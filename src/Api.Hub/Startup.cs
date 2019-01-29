@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Api.Common.Infrastructure;
+using Api.Hub.Hubs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-namespace Api.Identity
+namespace Api.Hub
 {
     public class Startup
     {
@@ -24,7 +20,20 @@ namespace Api.Identity
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(settings =>
+            {
+                settings.AddPolicy("CorsPolicy", builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                });
+            });
+
+            services.AddHealthChecks().AddCheck<HealthCheck>("default");
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSignalR(settings => { settings.EnableDetailedErrors = true; }).AddMessagePackProtocol();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -32,10 +41,16 @@ namespace Api.Identity
         {
             if (env.IsDevelopment())
             {
+                app.UseCors("CorsPolicy");
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseHealthChecks("/health");
             app.UseMvc();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<GameHub>("/game/socket");
+            });
         }
     }
 }

@@ -1,0 +1,10 @@
+.formWrapper {
+  margin: auto;
+  text-align: center;
+  width: 250px;
+  margin-top: 20px;
+}
+
+.submitWrapper {
+  padding: 20px;
+}

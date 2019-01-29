@@ -1,0 +1,18 @@
+.formWrapper {
+  margin: auto;
+  text-align: center;
+  width: 250px;
+  margin-top: 20px;
+}
+
+.divider {
+  width: 200px;
+  margin-top: 20px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.submitWrapper {
+  text-align: right;
+  padding: 20px;
+}
