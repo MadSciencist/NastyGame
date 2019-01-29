@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Snake } from "../../game/game";
+import { Game } from "../../game/game";
 import Constants from "app/game/Constants";
 
 class GameCanvas extends React.Component {
@@ -8,8 +8,8 @@ class GameCanvas extends React.Component {
   }
 
   onClick() {
-    const snake = new Snake();
-    snake.start();
+    const game = new Game();
+    game.stfu();
   }
 
   render() {

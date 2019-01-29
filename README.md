@@ -1,4 +1,4 @@
-Repository for an fun project, which is agar.io type game. It is fun project to learn some technologies, especially backend.
+Repository for an fun project, which is agar.io type game. The main goal of this is to learn some technologies, especially backend.
 
 ### Finished project is going to use:
 
@@ -14,7 +14,7 @@ Repository for an fun project, which is agar.io type game. It is fun project to 
  - API healtchecks
  - API docs (swagger)
 
-### Road Map
+### Road Map:
 - [x] Create MSQL DB
 - [x] Create JWT provider
 - [x] Create users API (login, register)
