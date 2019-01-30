@@ -7,8 +7,9 @@ export class Mouse {
     this.canvas = canvas;
   }
 
-  getPosition(evt: any): IPoint {
+  getPosition(evt: MouseEvent): IPoint {
     const bounding = this.canvas.getBoundingClientRect();
+    
     return {
       x: ((evt.clientX - bounding.left) / (bounding.right - bounding.left)) * this.canvas.width,
       y: ((evt.clientY - bounding.top) / (bounding.bottom - bounding.top)) * this.canvas.height

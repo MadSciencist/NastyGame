@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Game } from "../../game/game";
+import { Game } from "../../game/Game";
 import Constants from "app/game/Constants";
 
 class GameCanvas extends React.Component {
@@ -15,8 +15,8 @@ class GameCanvas extends React.Component {
   render() {
     return (
       <div>
-        <button onClick={this.onClick.bind(this)}>Clik</button>
-        <canvas id={"gameCanvas"} width={Constants.CANVAS_SIZE} height={Constants.CANVAS_SIZE} />
+        <button onClick={this.onClick.bind(this)}>Click</button>
+        <canvas id={"gameCanvas"} width={Constants.CanvasSize} height={Constants.CanvasSize} />
       </div>
     );
   }

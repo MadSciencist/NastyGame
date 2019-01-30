@@ -1,45 +1,44 @@
 import { IPoint } from "./IPoint";
-
-export interface IVector {
-  cord: IPoint;
-  mag: number;
-}
+import { IVector } from "./IVector";
 
 export class Vector implements IVector {
   public cord: IPoint;
-  public mag: number;
+  public mag: number = 1;
 
-  constructor(point: IPoint, magnitude: number) {
-    this.cord = { x: point.x * magnitude, y: point.y * magnitude };
-    this.mag = magnitude;
+  constructor(point: IPoint) {
+    this.cord = { x: point.x, y: point.y };
   }
 
-  applyMagnitude(magnitude: number): Vector {
+  static CreateVector(vector: IVector): IVector {
+    return new Vector(vector.cord);
+  }
+
+  public applyMagnitude(magnitude: number): IVector {
     return this.normalize().multiply(magnitude);
   }
 
-  add(vect: Vector): Vector {
+  public add(vect: IVector): IVector {
     this.cord.x = this.cord.x + vect.cord.x;
     this.cord.y = this.cord.y + vect.cord.y;
 
     return this;
   }
 
-  substract(vect: Vector): Vector {
+  public substract(vect: IVector): IVector {
     this.cord.x = this.cord.x - vect.cord.x;
     this.cord.y = this.cord.y - vect.cord.y;
 
     return this;
   }
 
-  multiply(scalar: number): Vector {
+  public multiply(scalar: number): IVector {
     this.cord.x *= scalar;
     this.cord.y *= scalar;
 
     return this;
   }
 
-  normalize(): Vector {
+  public normalize(): IVector {
     const len = this.magnitude();
 
     if (len !== 0) {
@@ -49,7 +48,14 @@ export class Vector implements IVector {
     return this;
   }
 
-  magnitude(): number {
+  public distance(v: IVector): number {
+    return Math.sqrt(
+      (this.cord.x - v.cord.x) * (this.cord.x - v.cord.x) +
+        (this.cord.y - v.cord.y) * (this.cord.y - v.cord.y)
+    );
+  }
+
+  public magnitude(): number {
     const x = this.cord.x;
     const y = this.cord.y;
 
