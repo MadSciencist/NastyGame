@@ -6,7 +6,7 @@ namespace Api.Hub.Controllers
 {
     [Route("")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize]
     public class HomeController : ControllerBase
     {
         [HttpGet]

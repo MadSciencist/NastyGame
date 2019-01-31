@@ -18,7 +18,8 @@
     "baseUrl": "src",
     "paths": {
       "app/*": ["./app/*"]
-    }
+    },
+    "typeRoots": ["node_modules/@types"]
   },
   "exclude": ["build", "node_modules"]
 }

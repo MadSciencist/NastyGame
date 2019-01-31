@@ -1,10 +1,19 @@
 ﻿using Api.Common.Infrastructure;
+using Api.Hub.BusinessLogic;
 using Api.Hub.Hubs;
+using Api.Hub.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Api.Hub
 {
@@ -31,9 +40,61 @@ namespace Api.Hub
                 });
             });
 
+            services.AddAuthorization();
+
+            var jwtKey = Configuration["AuthenticationJwt:Key"];
+            var jwtIssuer = Configuration["AuthenticationJwt:Issuer"];
+            var jwtAudience = Configuration["AuthenticationJwt:Audience"];
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                        ClockSkew = TimeSpan.FromMinutes(0),
+                    };
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = OnMessageReceived
+                    };
+                });
+
+            #if DEBUG
+            IdentityModelEventSource.ShowPII = true;
+            #endif
+
             services.AddHealthChecks().AddCheck<HealthCheck>("default");
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSignalR(settings => { settings.EnableDetailedErrors = true; }).AddMessagePackProtocol();
+
+            //services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.AddSingleton<IPlayers, Players>();
+            services.AddSingleton<IPlayersNotifierTask, PlayersNotifierTask>();
+        }
+
+        private Task OnMessageReceived(MessageReceivedContext context)
+        {
+            var accessToken = context.Request.Query["access_token"];
+            //var accessToken = context.Request.Headers["Authorization"].ToString().Split(" ")[1];
+
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/game/socket")))
+            {
+                // Read the token out of the query string
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +112,8 @@ namespace Api.Hub
             {
                 routes.MapHub<GameHub>("/game/socket");
             });
+
+           // app.UseAuthentication();
         }
     }
 }

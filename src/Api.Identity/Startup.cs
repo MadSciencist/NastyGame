@@ -1,11 +1,15 @@
-﻿using Api.Common.Infrastructure;
+﻿using System;
+using System.Text;
+using Api.Common.Infrastructure;
 using Api.Identity.Infrastructure;
 using Api.Identity.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace Api.Identity
@@ -43,6 +47,28 @@ namespace Api.Identity
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API docs" });
             });
+
+            AddJwtAuthentication(services);
+            services.AddAuthorization();
+        }
+
+        private void AddJwtAuthentication(IServiceCollection services)
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = Configuration["AuthenticationJwt:Issuer"],
+                        ValidAudience = Configuration["AuthenticationJwt:Issuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AuthenticationJwt:Key"])),
+                        ClockSkew = TimeSpan.FromMinutes(0)
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,6 +87,8 @@ namespace Api.Identity
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
+
+            app.UseAuthentication();
         }
     }
 }

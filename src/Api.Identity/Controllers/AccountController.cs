@@ -15,14 +15,12 @@ namespace Api.Identity.Controllers
         private readonly IUserRepository _userRepository;
         private readonly ITokenBuilder _tokenBuilder;
         private readonly IUserAuthenticator _authenticator;
-        private readonly IPasswordHasher _hasher;
 
-        public AccountController(IUserRepository userRepository, ITokenBuilder tokenBuilder, IUserAuthenticator authenticator, IPasswordHasher hasher)
+        public AccountController(IUserRepository userRepository, ITokenBuilder tokenBuilder, IUserAuthenticator authenticator)
         {
             _userRepository = userRepository;
             _tokenBuilder = tokenBuilder;
             _authenticator = authenticator;
-            _hasher = hasher;
         }
 
         [HttpPost("login")]
@@ -60,9 +58,6 @@ namespace Api.Identity.Controllers
             {
                 return BadRequest(new { Errors = new { title = "User with this login already exists" } });
             }
-
-            var hashedPassword = _hasher.CreateHashString(registerDto.Password);
-            registerDto.Password = hashedPassword;
 
             var createdUser = _userRepository.CreateUser(registerDto);
 

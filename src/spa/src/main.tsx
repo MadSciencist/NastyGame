@@ -5,10 +5,13 @@ import { createBrowserHistory } from "history";
 import { Router } from "react-router";
 import { App } from "./app";
 import configureStore from "./app/store/index";
+import { initializeIcons } from "office-ui-fabric-react/lib/Icons";
 
 // prepare store
-const history = createBrowserHistory();
+export const history = createBrowserHistory();
 const store = configureStore();
+
+initializeIcons();
 
 ReactDOM.render(
   <Provider store={store}>

@@ -12,12 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BusinessLogic\" />
-    <Folder Include="Infrastructure\" />
-    <Folder Include="Models\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Api.Common\Api.Common.csproj" />
   </ItemGroup>
 </Project>

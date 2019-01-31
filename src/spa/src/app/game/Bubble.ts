@@ -4,13 +4,15 @@ import { Vector } from "./models/Vector";
 export default class Bubble {
   public pos: Vector;
   public radius: number;
+  public name: string;
 
   private ctx: CanvasRenderingContext2D | null;
 
-  constructor(ctx: CanvasRenderingContext2D, vect: Vector, radius: number) {
+  constructor(ctx: CanvasRenderingContext2D, vect: Vector, radius: number, name: string) {
     this.ctx = ctx;
     this.pos = vect;
     this.radius = radius;
+    this.name = name;
   }
 
   public update(velocity: IPoint) {

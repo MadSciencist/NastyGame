@@ -2,6 +2,7 @@
 using Dapper;
 using Api.Identity.Models;
 using System.Data.SqlClient;
+using Api.Identity.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Api.Identity.Models.DTOs;
 
@@ -9,10 +10,12 @@ namespace Api.Identity.Repository
 {
     public class UserRepository : IUserRepository
     {
+        private readonly IPasswordHasher _hasher;
         private readonly string _connectionString;
 
-        public UserRepository(IConfiguration configuration)
+        public UserRepository(IConfiguration configuration, IPasswordHasher hasher)
         {
+            _hasher = hasher;
             _connectionString = configuration["ConnectionStrings:MsSql"];
         }
 
@@ -37,6 +40,8 @@ namespace Api.Identity.Repository
 
         public UserEntity CreateUser(RegisterDto user)
         {
+            var passwordHash = _hasher.CreateHashString(user.Password);
+
             const string query = @"INSERT INTO Users(Login, Password, Name, LastName, BirthDate, JoinDate, Email) VALUES (@Login, @Password, @Name, @LastName, @BirthDate, @JoinDate, @Email)";
 
             try
@@ -46,7 +51,7 @@ namespace Api.Identity.Repository
                     var rowsAffected = connection.Execute(query,
                         new
                         {
-                            user.Login, user.Password, user.Name, user.LastName, user.BirthDate, JoinDate = DateTime.Now,
+                            user.Login, passwordHash, user.Name, user.LastName, user.BirthDate, JoinDate = DateTime.Now,
                             user.Email
                         });
 
