@@ -21,16 +21,14 @@ export class Game {
     this.ctx = this.canvas.getContext("2d");
 
     this.multiplayer = new MultiplayerService();
-    this.multiplayer.onTrasureSpawned((enemies: Array<EnemyBubbleDto>) => {
+    this.multiplayer.onEnemiesUpdated((enemies: Array<EnemyBubbleDto>) => {
       this.enemies = [];
       this.enemies = enemies.map(
         (enemy: EnemyBubbleDto): Bubble => {
-          return new Bubble(this.ctx!, new Vector(enemy.Position), enemy.Radius, enemy.Name);
+          return new Bubble(this.ctx!, new Vector(enemy.Position), enemy.Radius, enemy.NickName);
         }
       );
-
-      console.log(this.enemies[0].name);
-      console.log(this.enemies[0].pos.cord);
+      console.log(this.enemies);
     });
 
     this.mouse = new Mouse(this.canvas);
@@ -56,6 +54,7 @@ export class Game {
 
       this.multiplayer.updateMyPosition(this.bubble);
 
+      // TODO move spawning extra bubbles to server
       for (let i = this.bubbles.length - 1; i >= 0; i--) {
         this.bubbles[i].show();
         if (this.bubble.canEat(this.bubbles[i])) {
@@ -65,18 +64,24 @@ export class Game {
       }
 
       for (let i = this.enemies.length - 1; i >= 0; i--) {
-        if (this.enemies[i].name !== "Matte") {
-          // dont draw myself
-          this.enemies[i].show();
-          if (this.bubble.canEat(this.enemies[i])) {
-            this.shouldUpdateZoom = true;
-            this.enemies.splice(i, 1);
-          }
+        const myName = (<HTMLInputElement>document.getElementById("nick-input")).value as string;
+
+        // dont draw myself
+        if (this.enemies[i].name === myName) {
+          continue;
+        }
+
+        this.enemies[i].show();
+        if (this.bubble.canEat(this.enemies[i])) {
+          // TODO
+          // now we need to inform signalR -> enemy(i) that he lost and prevent it respawning
+          this.enemies.splice(i, 1);
+          console.log(`Youve eatten: ${this.enemies[i].name}`);
         }
       }
 
       if (this.shouldUpdateZoom) {
-        console.log("update zoom");
+        // console.log("update zoom");
         this.shouldUpdateZoom = false;
       }
 
@@ -86,7 +91,7 @@ export class Game {
 
       this.prevPos.cord.x = this.bubble.pos.cord.x;
       this.prevPos.cord.y = this.bubble.pos.cord.y;
-    }, 20);
+    }, 100);
   }
 
   private prevPos: IVector;

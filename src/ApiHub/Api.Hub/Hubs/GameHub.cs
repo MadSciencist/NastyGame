@@ -1,71 +1,94 @@
-﻿using Api.Hub.BusinessLogic;
-using Api.Hub.Models.DTOs;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameDomain;
+using Api.Hub.Services;
 using System;
 using System.Threading.Tasks;
-using Api.Hub.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Hub.Hubs
 {
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GameHub : Microsoft.AspNetCore.SignalR.Hub
     {
-        private readonly IPlayers _players;
-        private readonly IPlayersNotifierTask _playersNotifier;
+        private readonly IPlayersService _playersService;
+        private readonly IPlayerNotifierTask _playersNotifier;
+        private readonly INpcSpawnerTask _npcSpawner;
+        private readonly ILogger<GameHub> _logger;
 
-        public GameHub(IPlayers players, IPlayersNotifierTask playersNotifier)
+        public GameHub(IPlayersService players, IPlayerNotifierTask playersNotifier, INpcSpawnerTask npcSpawner, ILogger<GameHub> logger)
         {
-            _players = players;
+            _playersService = players;
             _playersNotifier = playersNotifier;
+            _npcSpawner = npcSpawner;
+            _logger = logger;
         }
 
         public override Task OnConnectedAsync()
         {
-            
-            var name = Context.UserIdentifier;
-            Console.WriteLine($"Connected: {Context.UserIdentifier}");
+            var isAuthenticated = Context.UserIdentifier != null;
+            var connectionid = Context.ConnectionId;
+            _playersService.AddPlayer(connectionid, isAuthenticated);
 
-            _players.AddPlayer(name);
+            _logger.LogInformation($"New connection: {connectionid} isAuth: {isAuthenticated}");
 
-            if (_players.GetCount() > 0)
-            {
-                if (_playersNotifier.State == PlayerNotifierState.Stopped)
-                {
-                    _playersNotifier.Start();
-                }
-            }
+            StartCyclicTasks();
 
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
-            Console.WriteLine($"Disconnected: {Context.UserIdentifier}");
+            var connectionid = Context.ConnectionId;
+            _playersService.RemovePlayer(connectionid);
 
-            if (_players.GetCount() == 0)
-            {
-                if (_playersNotifier.State == PlayerNotifierState.Started)
-                {
-                    _playersNotifier.Stop();
-                }
-            }
+            StopCyclicTasks();
+
+            _logger.LogInformation($"Disconnecting: {connectionid}");
 
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task RegisterName(string name)
+        public void RegisterName(string name)
         {
-            Console.WriteLine("Registering: " + name);
+            _playersService.SetName(Context.ConnectionId, name);
         }
 
-        public async Task Update(BubbleDto bubble)
+        public void Update(BubbleDto bubble)
         {
-            var name = Context.UserIdentifier;
-            Console.WriteLine($"R: {bubble.Radius}  X: {bubble.Position.x}  Y: {bubble.Position.y}");
+            _playersService.Update(Context.ConnectionId, bubble);
+        }
 
-            _players.Update(name, bubble);
+        private void StartCyclicTasks()
+        {
+            _logger.LogInformation($"Starting cyclic tasks");
+
+            if (_playersService.GetCount() > 0)
+            {
+                if (_playersNotifier.State == NotifierState.Stopped)
+                {
+                    _playersNotifier.Start();
+                }
+                if (_npcSpawner.State == NotifierState.Stopped)
+                {
+                    _npcSpawner.Start();
+                }
+            }
+        }
+
+        private void StopCyclicTasks()
+        {
+            _logger.LogInformation($"Stopping cyclic tasks");
+
+            if (_playersService.GetCount() == 0)
+            {
+                if (_playersNotifier.State == NotifierState.Started)
+                {
+                    _playersNotifier.Stop();
+                }
+                if (_npcSpawner.State == NotifierState.Started)
+                {
+                    _npcSpawner.Stop();
+                }
+            }
         }
     }
 }

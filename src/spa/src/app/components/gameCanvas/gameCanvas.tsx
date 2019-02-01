@@ -15,6 +15,7 @@ class GameCanvas extends React.Component {
   render() {
     return (
       <div>
+        <input type={"text"} id={"nick-input"} placeholder={"Enter nickname"} />
         <button onClick={this.onClick.bind(this)}>Click</button>
         <canvas id={"gameCanvas"} width={Constants.CanvasSize} height={Constants.CanvasSize} />
       </div>

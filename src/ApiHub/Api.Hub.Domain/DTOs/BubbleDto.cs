@@ -1,4 +1,6 @@
-﻿namespace Api.Hub.Models.DTOs
+﻿using Api.Hub.Domain.GameDomain;
+
+namespace Api.Hub.Domain.DTOs
 {
     public class BubbleDto
     {

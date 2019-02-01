@@ -28,6 +28,10 @@ export default class MultiplayerService {
     this.conn.on("UpdateEnemies", (enemies: Array<EnemyBubbleDto>) => {
       this.enemiesUpdated(enemies);
     });
+
+    this.conn.on("SpawnNpcs", (a: string) => {
+      console.log(a);
+    });
   }
 
   public updateMyPosition(bubble: Bubble) {
@@ -45,13 +49,13 @@ export default class MultiplayerService {
   }
 
   // function to register callback by clients
-  public onTrasureSpawned(callback: (position: Array<EnemyBubbleDto>) => void): void {
+  public onEnemiesUpdated(callback: (position: Array<EnemyBubbleDto>) => void): void {
     this.enemiesUpdated = callback;
   }
 
-  private onConnected() {
-    console.log("Connection started");
-    this.registerNickname("TestNick");
+  private async onConnected() {
+    const myName = (<HTMLInputElement>document.getElementById("nick-input")).value as string;
+    await this.registerNickname(myName);
   }
 
   private errorHandler(err: any): void {

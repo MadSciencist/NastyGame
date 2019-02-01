@@ -1,4 +1,4 @@
-﻿namespace Api.Hub.Models
+﻿namespace Api.Hub.Domain.GameDomain
 {
     public class Point2D
     {

@@ -1,7 +1,6 @@
 ﻿using Api.Common.Infrastructure;
-using Api.Hub.BusinessLogic;
+using Api.Hub.Domain.GameDomain;
 using Api.Hub.Hubs;
-using Api.Hub.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Api.Hub.Services;
 
 namespace Api.Hub
 {
@@ -68,17 +68,14 @@ namespace Api.Hub
                     };
                 });
 
-            #if DEBUG
-            IdentityModelEventSource.ShowPII = true;
-            #endif
-
             services.AddHealthChecks().AddCheck<HealthCheck>("default");
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSignalR(settings => { settings.EnableDetailedErrors = true; }).AddMessagePackProtocol();
 
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
-            services.AddSingleton<IPlayers, Players>();
-            services.AddSingleton<IPlayersNotifierTask, PlayersNotifierTask>();
+            services.AddSingleton<IPlayersService, PlayersService>();
+            services.AddSingleton<IPlayerNotifierTask, PlayerNotifierTask>();
+            services.AddSingleton<INpcSpawnerTask, NpcSpawnerTask>();
         }
 
         private Task OnMessageReceived(MessageReceivedContext context)
@@ -104,6 +101,7 @@ namespace Api.Hub
             {
                 app.UseCors("CorsPolicy");
                 app.UseDeveloperExceptionPage();
+                IdentityModelEventSource.ShowPII = true;
             }
 
             app.UseHealthChecks("/health");
