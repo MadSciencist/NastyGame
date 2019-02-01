@@ -76,7 +76,7 @@ namespace Api.Hub
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSignalR(settings => { settings.EnableDetailedErrors = true; }).AddMessagePackProtocol();
 
-            //services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
             services.AddSingleton<IPlayers, Players>();
             services.AddSingleton<IPlayersNotifierTask, PlayersNotifierTask>();
         }
@@ -113,7 +113,7 @@ namespace Api.Hub
                 routes.MapHub<GameHub>("/game/socket");
             });
 
-           // app.UseAuthentication();
+            app.UseAuthentication();
         }
     }
 }

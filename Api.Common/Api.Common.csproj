@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions">
+      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.extensions.diagnostics.healthchecks.abstractions\2.2.0\lib\netstandard2.0\Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

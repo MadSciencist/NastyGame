@@ -9,7 +9,7 @@ using Api.Hub.Infrastructure;
 
 namespace Api.Hub.Hubs
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class GameHub : Microsoft.AspNetCore.SignalR.Hub
     {
         private readonly IPlayers _players;
@@ -23,6 +23,7 @@ namespace Api.Hub.Hubs
 
         public override Task OnConnectedAsync()
         {
+            
             var name = Context.UserIdentifier;
             Console.WriteLine($"Connected: {Context.UserIdentifier}");
 
@@ -52,6 +53,11 @@ namespace Api.Hub.Hubs
             }
 
             return base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task RegisterName(string name)
+        {
+            Console.WriteLine("Registering: " + name);
         }
 
         public async Task Update(BubbleDto bubble)
