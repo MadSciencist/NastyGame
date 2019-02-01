@@ -1,6 +1,7 @@
 ﻿using Api.Common.Infrastructure;
-using Api.Hub.Domain.GameDomain;
+using Api.Hub.Domain.Services;
 using Api.Hub.Hubs;
+using Api.Hub.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +14,6 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Api.Hub.Services;
 
 namespace Api.Hub
 {
@@ -76,6 +76,7 @@ namespace Api.Hub
             services.AddSingleton<IPlayersService, PlayersService>();
             services.AddSingleton<IPlayerNotifierTask, PlayerNotifierTask>();
             services.AddSingleton<INpcSpawnerTask, NpcSpawnerTask>();
+            services.AddSingleton<INpcService, NpcService>();
         }
 
         private Task OnMessageReceived(MessageReceivedContext context)

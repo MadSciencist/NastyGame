@@ -1,9 +1,9 @@
 ﻿using Api.Hub.Domain.DTOs;
-using Api.Hub.Domain.GameDomain;
+using Api.Hub.Domain.Services;
 using Api.Hub.Services;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Hub.Hubs
 {

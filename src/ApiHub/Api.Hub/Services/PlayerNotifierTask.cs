@@ -1,9 +1,11 @@
-﻿using Api.Hub.Domain.GameDomain;
+﻿using Api.Hub.Domain.Services;
 using Api.Hub.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading;
+using Api.Hub.Domain.DTOs;
 
 namespace Api.Hub.Services
 {
@@ -28,7 +30,7 @@ namespace Api.Hub.Services
 
                 if (_playersService.GetCount() > 0)
                 {
-                    var players = _playersService.GetPlayers();
+                    var players = _playersService.GetPlayers().Select(player => new EnemyBubblesDto(player)).ToList();
                     await _gameHub.Clients.All.SendAsync("UpdateEnemies", players);
                 }
             }

@@ -29,7 +29,7 @@ export default class MultiplayerService {
       this.enemiesUpdated(enemies);
     });
 
-    this.conn.on("SpawnNpcs", (a: string) => {
+    this.conn.on("SpawnNpcs", (a: any) => {
       console.log(a);
     });
   }

@@ -2,16 +2,6 @@
 
 namespace Api.Hub.Domain.GameDomain
 {
-    public class PlayerBase
-    {
-        public Bubble Bubble { get; set; }
-    }
-
-    public class NpcBubble : PlayerBase
-    {
-
-    }
-
     public class Player : PlayerBase
     {
         public string ConnectionId { get; set; }

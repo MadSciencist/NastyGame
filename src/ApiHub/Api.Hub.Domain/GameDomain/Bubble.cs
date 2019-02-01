@@ -13,6 +13,12 @@ namespace Api.Hub.Domain.GameDomain
             Radius = bubbleDto.Radius;
         }
 
+        public Bubble(Bubble bubble)
+        {
+            Position = bubble.Position;
+            Radius = bubble.Radius;
+        }
+
         public Bubble(){ }
     }
 }

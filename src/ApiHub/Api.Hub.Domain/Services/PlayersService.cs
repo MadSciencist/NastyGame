@@ -1,9 +1,10 @@
 ﻿using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameDomain;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Api.Hub.Domain.GameDomain
+namespace Api.Hub.Domain.Services
 {
     public class PlayersService : IPlayersService
     {
@@ -17,7 +18,7 @@ namespace Api.Hub.Domain.GameDomain
         }
 
         public int GetCount() => _players.Count;
-        public IList<EnemyBubblesDto> GetPlayers() => _players.Select(player => new EnemyBubblesDto(player)).ToList();
+        public IList<Player> GetPlayers() => _players;
 
         public void AddPlayer(string connectionId, bool isAuthenticated)
         {
