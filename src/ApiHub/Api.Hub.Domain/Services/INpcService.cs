@@ -9,5 +9,6 @@ namespace Api.Hub.Domain.Services
     {
         IList<NpcBubble> GetNpcs();
         void KillNpc(Guid guid);
+        void KillNpc(NpcBubble victim);
     }
 }

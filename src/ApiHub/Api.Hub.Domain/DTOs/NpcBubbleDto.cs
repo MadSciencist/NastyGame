@@ -5,13 +5,15 @@ namespace Api.Hub.Domain.DTOs
 {
     public class NpcBubbleDto
     {
-        public Bubble Bubble { get; set; }
+        // TODO merge it somehow with EnemyBubbleDto (superclass or something)
+        public Point2D Position { get; set; }
+        public double Radius { get; set; }
         public Guid Guid { get; set; }
 
         public NpcBubbleDto(NpcBubble npcBubble)
         {
-            Bubble = new Bubble(npcBubble.Bubble);
-
+            Position = npcBubble.Bubble.Position;
+            Radius = npcBubble.Bubble.Radius;
             Guid = npcBubble.Guid;
         }
 

@@ -1,4 +1,5 @@
-﻿using Api.Hub.Domain.DTOs;
+﻿using System;
+using Api.Hub.Domain.DTOs;
 
 namespace Api.Hub.Domain.GameDomain
 {
@@ -19,6 +20,31 @@ namespace Api.Hub.Domain.GameDomain
             Radius = bubble.Radius;
         }
 
-        public Bubble(){ }
+        public Bubble()
+        {
+        }
+
+        public bool CanBeat(Bubble otherBubble)
+        {
+            var distance = GetDistance(otherBubble);
+
+            if (distance < Radius + otherBubble.Radius)
+            {
+                var totalArea = Math.PI * Radius * Radius + Math.PI * otherBubble.Radius * otherBubble.Radius;
+                Radius = Math.Sqrt(totalArea / Math.PI);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public double GetDistance(Bubble other)
+        {
+            var deltaX = Position.x - other.Position.x;
+            var deltaY = Position.y - other.Position.y;
+            return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+        }
     }
 }
+

@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Api.Hub.Domain.GameDomain;
 
 namespace Api.Hub
 {
@@ -77,6 +78,7 @@ namespace Api.Hub
             services.AddSingleton<IPlayerNotifierTask, PlayerNotifierTask>();
             services.AddSingleton<INpcSpawnerTask, NpcSpawnerTask>();
             services.AddSingleton<INpcService, NpcService>();
+            services.AddSingleton<IGameplay, Gameplay>();
         }
 
         private Task OnMessageReceived(MessageReceivedContext context)

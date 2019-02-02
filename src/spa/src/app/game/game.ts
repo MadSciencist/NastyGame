@@ -5,6 +5,7 @@ import { IVector } from "./models/IVector";
 import Bubble from "./Bubble";
 import MultiplayerService from "./multiplayer/MultiplayerService";
 import EnemyBubbleDto from "./multiplayer/EnemyBubbleDto";
+import NpcBubbleDto from "./multiplayer/NpcBubbleDto";
 
 export class Game {
   private multiplayer: MultiplayerService;
@@ -13,8 +14,8 @@ export class Game {
   private mouse: Mouse;
   private mousePos: IPoint = { x: 200, y: 200 };
   private bubble: Bubble;
-  private bubbles: Array<Bubble> = [];
   private enemies: Array<Bubble> = [];
+  private npcs: Array<Bubble> = [];
 
   constructor() {
     this.canvas = <HTMLCanvasElement>document.getElementById("gameCanvas");
@@ -28,7 +29,15 @@ export class Game {
           return new Bubble(this.ctx!, new Vector(enemy.Position), enemy.Radius, enemy.NickName);
         }
       );
-      console.log(this.enemies);
+      // console.log(enemies);
+    });
+
+    this.multiplayer.onNpcsUpdated((npcs: Array<NpcBubbleDto>) => {
+      this.npcs = npcs.map(
+        (enemy: NpcBubbleDto): Bubble => {
+          return new Bubble(this.ctx!, new Vector(enemy.Position), enemy.Radius, enemy.Guid);
+        }
+      );
     });
 
     this.mouse = new Mouse(this.canvas);
@@ -40,27 +49,17 @@ export class Game {
     this.prevPos = Vector.CreateVector(initalPos);
     this.bubble = new Bubble(this.ctx!, initalPos, 30, "ME");
 
-    for (let i = 0; i < 100; i++) {
-      const vect = new Vector({ x: Math.random() * 1600, y: Math.random() * 1600 });
-      this.bubbles.push(new Bubble(this.ctx!, vect, Math.random() * 20, ""));
-    }
-
     setInterval(() => {
       this.fillCanvas();
       this.drawBoard();
 
-      this.bubble.show();
       this.bubble.update(this.mousePos);
+      this.bubble.show();
 
       this.multiplayer.updateMyPosition(this.bubble);
 
-      // TODO move spawning extra bubbles to server
-      for (let i = this.bubbles.length - 1; i >= 0; i--) {
-        this.bubbles[i].show();
-        if (this.bubble.canEat(this.bubbles[i])) {
-          this.shouldUpdateZoom = true;
-          this.bubbles.splice(i, 1);
-        }
+      for (let i = this.npcs.length - 1; i >= 0; i--) {
+        this.npcs[i].show();
       }
 
       for (let i = this.enemies.length - 1; i >= 0; i--) {
@@ -68,21 +67,13 @@ export class Game {
 
         // dont draw myself
         if (this.enemies[i].name === myName) {
+          this.bubble.radius = this.enemies[i].radius;
+          console.log(this.enemies[i].radius);
+          console.log(this.bubble.radius);
           continue;
         }
 
         this.enemies[i].show();
-        if (this.bubble.canEat(this.enemies[i])) {
-          // TODO
-          // now we need to inform signalR -> enemy(i) that he lost and prevent it respawning
-          this.enemies.splice(i, 1);
-          console.log(`Youve eatten: ${this.enemies[i].name}`);
-        }
-      }
-
-      if (this.shouldUpdateZoom) {
-        // console.log("update zoom");
-        this.shouldUpdateZoom = false;
       }
 
       const dx = this.bubble.pos.cord.x - this.prevPos.cord.x;
@@ -91,11 +82,10 @@ export class Game {
 
       this.prevPos.cord.x = this.bubble.pos.cord.x;
       this.prevPos.cord.y = this.bubble.pos.cord.y;
-    }, 100);
+    }, 25);
   }
 
   private prevPos: IVector;
-  private shouldUpdateZoom: boolean = false;
 
   protected fillCanvas() {
     this.ctx!.fillStyle = "gray";

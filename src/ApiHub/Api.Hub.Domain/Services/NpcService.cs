@@ -1,5 +1,4 @@
-﻿using Api.Hub.Domain.DTOs;
-using Api.Hub.Domain.GameConfig;
+﻿using Api.Hub.Domain.GameConfig;
 using Api.Hub.Domain.GameDomain;
 using System;
 using System.Collections.Generic;
@@ -36,6 +35,11 @@ namespace Api.Hub.Domain.Services
         {
             var victim = _npcs.FirstOrDefault(v => v.Guid == guid);
             if(victim != null) _npcs.Remove(victim);
+        }
+
+        public void KillNpc(NpcBubble victim)
+        {
+            if (victim != null) _npcs.Remove(victim);
         }
 
         private void GenerateNpcs(int count)

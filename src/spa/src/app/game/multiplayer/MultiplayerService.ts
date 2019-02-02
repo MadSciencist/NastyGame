@@ -4,11 +4,13 @@ import Constants from "../Constants";
 import Bubble from "../Bubble";
 import BubbleDto from "./BubbleDto";
 import EnemyBubbleDto from "./EnemyBubbleDto";
+import NpcBubbleDto from "./NpcBubbleDto";
 
 export default class MultiplayerService {
   private conn: SignalR.HubConnection;
   // private token: string;
   private enemiesUpdated: (dto: Array<EnemyBubbleDto>) => void;
+  private npcsUpdated: (dto: Array<NpcBubbleDto>) => void;
 
   constructor() {
     // this.token =
@@ -29,8 +31,8 @@ export default class MultiplayerService {
       this.enemiesUpdated(enemies);
     });
 
-    this.conn.on("SpawnNpcs", (a: any) => {
-      console.log(a);
+    this.conn.on("SpawnNpcs", (npcs: Array<NpcBubbleDto>) => {
+      this.npcsUpdated(npcs);
     });
   }
 
@@ -51,6 +53,10 @@ export default class MultiplayerService {
   // function to register callback by clients
   public onEnemiesUpdated(callback: (position: Array<EnemyBubbleDto>) => void): void {
     this.enemiesUpdated = callback;
+  }
+
+  public onNpcsUpdated(callback: (dto: Array<NpcBubbleDto>) => void): void {
+    this.npcsUpdated = callback;
   }
 
   private async onConnected() {

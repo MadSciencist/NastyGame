@@ -1,9 +1,14 @@
 ﻿using Api.Hub.Domain.Services;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Api.Hub.Domain.GameDomain
 {
-    public class Gameplay
+    public interface IGameplay
+    {
+        void UpdateGameplay();
+    }
+
+    public class Gameplay : IGameplay
     {
         private readonly IPlayersService _playersService;
         private readonly INpcService _npcService;
@@ -14,15 +19,28 @@ namespace Api.Hub.Domain.GameDomain
             _npcService = npcService;
         }
 
-        void UpdateGameplay()
+        public void UpdateGameplay()
         {
-            // tests so far
-            var npc = _npcService.GetNpcs().First();
-            var player = _playersService.GetPlayers().First();
+            var players = _playersService.GetPlayers();
+            var npcs = _npcService.GetNpcs();
 
-            var can = npc.CanBeat(player);
+            var markedToKill = new List<NpcBubble>();
 
-            var other = player.CanBeat(npc);
+            foreach (var player in players)
+            {
+                foreach (var npc in npcs)
+                {
+                    if (player.Bubble.CanBeat(npc.Bubble))
+                    {
+                        markedToKill.Add(npc);
+                    }
+                }
+            }
+
+            foreach (var kill in markedToKill)
+            {
+                _npcService.KillNpc(kill);
+            }
         }
     }
 }
