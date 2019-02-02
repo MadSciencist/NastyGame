@@ -10,6 +10,8 @@ namespace Api.Hub.Domain.DTOs
         public int WorldHeight { get; private set; }
         public int InitialRadius { get; private set; }
 
+
+
         public GameConfigDto(string connectionId, string name)
         {
             ConnectionId = connectionId;

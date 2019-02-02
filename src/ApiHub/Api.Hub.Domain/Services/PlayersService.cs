@@ -4,28 +4,27 @@ using Api.Hub.Domain.GameDomain;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Api.Hub.Domain.Services
 {
     public class PlayersService : IPlayersService
     {
-        public event EventHandler<Player> PlayerRemoved;
+        public event EventHandler<string> PlayerRemoved;
         private readonly INpcService _npcService;
         private readonly ILogger<PlayersService> _logger;
-        private readonly List<PlayerBase> _players;
+        private readonly List<Player> _players;
 
         public PlayersService(INpcService npcService, ILogger<PlayersService> logger)
         {
             _npcService = npcService;
             _logger = logger;
-            _players = new List<PlayerBase>();
+            _players = new List<Player>();
             _players.AddRange(npcService.GetDefaultCountOfNpcs());
         }
 
         public int GetCount() => _players.Count;
-        public IList<PlayerBase> GetPlayers() => _players;
+        public IList<Player> GetPlayers() => _players;
 
         public void AddPlayer(string connectionId, bool isAuthenticated)
         {
@@ -38,44 +37,16 @@ namespace Api.Hub.Domain.Services
             }
 
             var defaultBubble = new Bubble { Position = new Point2D((double)CanvasConfig.WorldWidth / 2, (double)CanvasConfig.WorldHeight / 2), Radius = BubbleConfig.InitialPlayerRadius };
-
-            _players.Add(new Player
-            {
-                ConnectionId = connectionId,
-                IsNpc = false,
-                Bubble = defaultBubble,
-                IsAuthenticated = isAuthenticated,
-                JoinedTime = DateTime.UtcNow,
-                Score = 0,
-                Victims = new List<string>()
-            });
+            _players.Add(new Player { ConnectionId = connectionId, IsNpc = false, Bubble = defaultBubble, IsAuthenticated = isAuthenticated });
 
             _logger.LogInformation($"Added player: {connectionId}, isAuth: {isAuthenticated}.");
         }
 
-        public void UpdateStats(PlayerBase killer, PlayerBase victim)
+        public void KillPlayer(Player player)
         {
-            if (killer is Player murderer)
-            {
-                Console.WriteLine($"Player: {murderer.Name} killed: {victim?.Name}");
-                murderer.Score++;
-                Console.WriteLine($"Player score: {murderer.Score}");
-                if (victim is Player vict)
-                {
-                    murderer.Victims.Add(vict.Name);
-                    vict.KilledBy = murderer.Name;
-                    Console.WriteLine($"Victim len: {murderer.Victims.Count}");
-                }
-            }
-
-        }
-
-        public void KillPlayer(PlayerBase player)
-        {
-            if (player is Player victim)
-            {
-                PlayerRemoved?.Invoke(this, victim);
-            }             
+            // update this client that he lost
+            if (player.IsNpc == false)
+                PlayerRemoved?.Invoke(this, player.ConnectionId);
 
             _players.Remove(player);
         }
@@ -97,7 +68,7 @@ namespace Api.Hub.Domain.Services
 
         public void RemovePlayer(string connectionId)
         {
-            var player = _players.ToList().FirstOrDefault(p => p.ConnectionId == connectionId);
+            var player = _players.FirstOrDefault(p => p.ConnectionId == connectionId);
 
             if (player == null)
             {

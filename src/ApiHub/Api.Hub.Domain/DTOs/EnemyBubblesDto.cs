@@ -4,9 +4,6 @@ using System.Linq;
 
 namespace Api.Hub.Domain.DTOs
 {
-    /// <summary>
-    /// This class is used as DTO when batch-updating all the clients
-    /// </summary>
     public class EnemyBubblesDto
     {
         public string ConnectionId { get; set; }
@@ -14,7 +11,7 @@ namespace Api.Hub.Domain.DTOs
         public Point2D Position { get; set; }
         public double Radius { get; set; }
 
-        public EnemyBubblesDto(PlayerBase player)
+        public EnemyBubblesDto(Player player)
         {
             NickName = player.Name;
             Position = player.Bubble.Position;
@@ -25,7 +22,7 @@ namespace Api.Hub.Domain.DTOs
         // needed for MessagePack serializer
         public EnemyBubblesDto() { }
 
-        public IEnumerable<EnemyBubblesDto> Map(IEnumerable<PlayerBase> players)
+        public IEnumerable<EnemyBubblesDto> Map(IEnumerable<Player> players)
         {
             return players.Select(x => new EnemyBubblesDto(x));
         }

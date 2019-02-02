@@ -8,9 +8,9 @@ namespace Api.Hub.Domain.Services
 {
     public class NpcService : INpcService
     {
-        public IEnumerable<NpcPlayer> GetDefaultCountOfNpcs() => GenerateNpcs(BubbleConfig.MaxNpcs);
+        public IEnumerable<Player> GetDefaultCountOfNpcs() => GenerateNpcs(BubbleConfig.MaxNpcs);
 
-        public int GetCountOfNeededNpcs(IEnumerable<PlayerBase> players)
+        public int GetCountOfNeededNpcs(IEnumerable<Player> players)
         {
             // ReSharper disable once RemoveToList.2
             var npcsNow = players.ToList().Count(x => x.IsNpc);
@@ -28,9 +28,9 @@ namespace Api.Hub.Domain.Services
             //}
         }
 
-        public IEnumerable<NpcPlayer> GenerateNpcs(int count)
+        public IEnumerable<Player> GenerateNpcs(int count)
         {
-            var npcs = new List<NpcPlayer>();
+            var npcs = new List<Player>();
             var random = new Random();
 
             for (var i = 0; i < count; i++)
@@ -40,7 +40,7 @@ namespace Api.Hub.Domain.Services
                 var posY = random.Next(0, CanvasConfig.WorldHeight);
                 var position = new Point2D(posX, posY);
 
-                npcs.Add(new NpcPlayer { Bubble = new Bubble { Radius = radius, Position = position }, IsNpc = true });
+                npcs.Add(new Player { Bubble = new Bubble { Radius = radius, Position = position }, IsNpc = true });
             }
 
             return npcs;
