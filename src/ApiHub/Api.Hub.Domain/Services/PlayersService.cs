@@ -58,14 +58,11 @@ namespace Api.Hub.Domain.Services
         {
             if (killer is Player murderer)
             {
-                Console.WriteLine($"Player: {murderer.Name} killed: {victim?.Name}");
                 murderer.Score++;
-                Console.WriteLine($"Player score: {murderer.Score}");
                 if (victim is Player vict)
                 {
                     murderer.Victims.Add(vict.Name);
                     vict.KilledBy = murderer.Name;
-                    Console.WriteLine($"Victim len: {murderer.Victims.Count}");
                 }
 
                 PlayerScored?.Invoke(this, murderer);
