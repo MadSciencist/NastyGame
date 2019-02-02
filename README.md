@@ -6,7 +6,7 @@ Repository for an fun project, which is agar.io type game. The main goal of this
  - React + Redux (TypeScript) for simple SPA (mainly managing user & stats)
  - Simple game written in TS using HTML5 Canvas
  - JWT authentication/authorization
- - SignalR for real-time communication
+ - SignalR for real-time communication w/ MessagePack
  - Microservices architecture
  - Docker containers (docker-compose as simple orchestrator)
  - RabbitMQ for message queuing
@@ -20,7 +20,7 @@ Repository for an fun project, which is agar.io type game. The main goal of this
 - [x] Create users API (login, register)
 - [x] Create React+Redux+TypeScript SPA template
 - [ ] **[In progress]** Create simple game (more like PoC then actuall game)
-- [ ] Create SignalR hub for managing multiplayer mode
-- [ ] Authorize SignalR
+- [ ] **[In progress]** Create SignalR hub for managing multiplayer mode
+- [ ] **[In progress]** Authorize SignalR
 - [ ] Create RabbitMQ messaging for notyfying Identity service about user stats
 - [ ] Move into docker containers
