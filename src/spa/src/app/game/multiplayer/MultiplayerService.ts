@@ -6,13 +6,14 @@ import EnemyBubbleDto from "./EnemyBubbleDto";
 import { GameConfigDto } from "./GameConfigDto";
 import GameConfig from "../GameConfig";
 import PlayerBubble from "../models/PlayerBubble";
+import PlayerDto from "./PlayerDto";
 
 export default class MultiplayerService {
   private conn: SignalR.HubConnection;
   // private token: string;
   private enemiesUpdated: (dto: Array<EnemyBubbleDto>) => void;
   private connectionStarted: (dto: GameConfig) => void;
-  private lostGame: () => void;
+  // private lostGame: () => void;
 
   constructor() {
     // this.token =
@@ -33,9 +34,10 @@ export default class MultiplayerService {
       this.enemiesUpdated(enemies);
     });
 
-    this.conn.on("Lost", (e: string) => {
+    this.conn.on("Lost", (lostDto: PlayerDto) => {
+      console.log(lostDto);
       this.conn.stop();
-      this.lostGame();
+      // this.lostGame();
     });
   }
 
@@ -57,7 +59,7 @@ export default class MultiplayerService {
   }
 
   public async onLost(callback: () => void) {
-    this.lostGame = callback;
+    // this.lostGame = callback;
   }
 
   private async onConnected() {

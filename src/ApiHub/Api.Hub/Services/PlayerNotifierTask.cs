@@ -26,9 +26,9 @@ namespace Api.Hub.Services
             _playersService.PlayerRemoved += PlayersServiceOnPlayerRemoved;
         }
 
-        private async void PlayersServiceOnPlayerRemoved(object sender, string e)
+        private async void PlayersServiceOnPlayerRemoved(object sender, Player player)
         {
-            await _gameHub.Clients.Client(e).SendAsync("Lost", "lolololo");
+            await _gameHub.Clients.Client(player.ConnectionId).SendAsync("Lost", new PlayerDto(player));
         }
 
         protected override async void Execute()
