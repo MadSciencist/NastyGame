@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using Api.Identity.Extensions;
 
-namespace Api.Identity.Infrastructure
+namespace Api.Identity.Services
 {
     public class PasswordHasher : IPasswordHasher
     {

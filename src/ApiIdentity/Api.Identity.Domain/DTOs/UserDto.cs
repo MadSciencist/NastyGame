@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Api.Identity.Models.DTOs
+namespace Api.Identity.Domain.DTOs
 {
     public class UserDto
     {

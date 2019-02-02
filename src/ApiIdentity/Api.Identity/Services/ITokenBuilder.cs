@@ -1,6 +1,6 @@
-﻿using Api.Identity.Models;
+﻿using Api.Identity.Domain;
 
-namespace Api.Identity.Infrastructure
+namespace Api.Identity.Services
 {
     public interface ITokenBuilder
     {

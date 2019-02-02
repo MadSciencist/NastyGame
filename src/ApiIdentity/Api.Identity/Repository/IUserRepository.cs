@@ -1,5 +1,5 @@
-﻿using Api.Identity.Models;
-using Api.Identity.Models.DTOs;
+﻿using Api.Identity.Domain;
+using Api.Identity.Domain.DTOs;
 
 namespace Api.Identity.Repository
 {

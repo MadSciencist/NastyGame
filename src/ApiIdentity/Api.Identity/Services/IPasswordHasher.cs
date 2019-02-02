@@ -1,4 +1,4 @@
-﻿namespace Api.Identity.Infrastructure
+﻿namespace Api.Identity.Services
 {
     public interface IPasswordHasher
     {

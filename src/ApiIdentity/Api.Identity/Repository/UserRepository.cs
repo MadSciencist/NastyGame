@@ -1,21 +1,24 @@
-﻿using System;
+﻿using Api.Identity.Domain;
+using Api.Identity.Domain.DTOs;
+using Api.Identity.Services;
 using Dapper;
-using Api.Identity.Models;
-using System.Data.SqlClient;
-using Api.Identity.Infrastructure;
 using Microsoft.Extensions.Configuration;
-using Api.Identity.Models.DTOs;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Data.SqlClient;
 
 namespace Api.Identity.Repository
 {
     public class UserRepository : IUserRepository
     {
         private readonly IPasswordHasher _hasher;
+        private readonly ILogger<UserRepository> _logger;
         private readonly string _connectionString;
 
-        public UserRepository(IConfiguration configuration, IPasswordHasher hasher)
+        public UserRepository(IConfiguration configuration, IPasswordHasher hasher, ILogger<UserRepository> logger)
         {
             _hasher = hasher;
+            _logger = logger;
             _connectionString = configuration["ConnectionStrings:MsSql"];
         }
 
@@ -32,8 +35,9 @@ namespace Api.Identity.Repository
                     return user;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError(e, $"Error while querying user data: {login}");
                 return null;
             }
         }
@@ -57,12 +61,14 @@ namespace Api.Identity.Repository
 
                     if (rowsAffected == 0)
                     {
+                        _logger.LogError($"Error while creating user: no rows affected");
                         return null;
                     }
                 }
             }
-            catch (SqlException) // probably trying to insert some NULLs
+            catch (SqlException e) // probably trying to insert some NULLs
             {
+                _logger.LogError(e, $"Error while creating user: {user.Login}");
                 return null;
             }
 

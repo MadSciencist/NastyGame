@@ -1,8 +1,6 @@
-﻿using System;
-using System.Text;
-using Api.Common.Infrastructure;
-using Api.Identity.Infrastructure;
+﻿using Api.Common.Infrastructure;
 using Api.Identity.Repository;
+using Api.Identity.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
+using System.Text;
 
 namespace Api.Identity
 {

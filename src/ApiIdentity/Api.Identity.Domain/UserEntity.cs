@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Api.Identity.Models
+namespace Api.Identity.Domain
 {
     public class UserEntity
     {
