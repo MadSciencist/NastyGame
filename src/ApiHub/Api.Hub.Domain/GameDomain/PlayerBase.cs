@@ -11,14 +11,14 @@ namespace Api.Hub.Domain.GameDomain
         public Bubble Bubble { get; set; }
         public bool IsNpc { get; set; } = false;
         public bool IsDown { get; set; } = false;
-    
+
         public PlayerBase(string connectionId, BubbleDto bubbleDto)
         {
             ConnectionId = connectionId;
             Bubble = new Bubble(bubbleDto);
         }
 
-        public PlayerBase(){ }
+        public PlayerBase() { }
 
         public bool TryKill(PlayerBase otherPlayer)
         {
@@ -26,10 +26,14 @@ namespace Api.Hub.Domain.GameDomain
 
             if (distance < Bubble.Radius + otherPlayer.Bubble.Radius)
             {
-                var totalArea = Math.PI * Bubble.Radius * Bubble.Radius + Math.PI * otherPlayer.Bubble.Radius * otherPlayer.Bubble.Radius;
-                if(Bubble.Radius < BubbleConfig.MaxRadius) Bubble.Radius = Math.Sqrt(totalArea / Math.PI);
+                if (Bubble.Radius > otherPlayer.Bubble.Radius)
+                {
+                    var totalArea = Math.PI * Bubble.Radius * Bubble.Radius +
+                                    Math.PI * otherPlayer.Bubble.Radius * otherPlayer.Bubble.Radius;
+                    if (Bubble.Radius < BubbleConfig.MaxRadius) Bubble.Radius = Math.Sqrt(totalArea / Math.PI);
 
-                return true;
+                    return true;
+                }
             }
 
             return false;

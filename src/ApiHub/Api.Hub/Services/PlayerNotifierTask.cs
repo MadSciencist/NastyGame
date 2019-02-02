@@ -24,6 +24,12 @@ namespace Api.Hub.Services
             _playersService = players;
             _logger = logger;
             _playersService.PlayerRemoved += PlayersServiceOnPlayerRemoved;
+            _playersService.PlayerScored += PlayersServiceOnPlayerScored;
+        }
+
+        private async void PlayersServiceOnPlayerScored(object sender, Player player)
+        {
+            await _gameHub.Clients.Client(player.ConnectionId).SendAsync("Scored", new PlayerDto(player));
         }
 
         private async void PlayersServiceOnPlayerRemoved(object sender, Player player)

@@ -12,6 +12,7 @@ namespace Api.Hub.Domain.Services
     public class PlayersService : IPlayersService
     {
         public event EventHandler<Player> PlayerRemoved;
+        public event EventHandler<Player> PlayerScored;
         private readonly INpcService _npcService;
         private readonly ILogger<PlayersService> _logger;
         private readonly List<PlayerBase> _players;
@@ -66,8 +67,9 @@ namespace Api.Hub.Domain.Services
                     vict.KilledBy = murderer.Name;
                     Console.WriteLine($"Victim len: {murderer.Victims.Count}");
                 }
-            }
 
+                PlayerScored?.Invoke(this, murderer);
+            }
         }
 
         public void KillPlayer(PlayerBase player)

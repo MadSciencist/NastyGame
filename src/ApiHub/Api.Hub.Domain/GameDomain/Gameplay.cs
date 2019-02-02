@@ -1,5 +1,4 @@
-﻿using System;
-using Api.Hub.Domain.Services;
+﻿using Api.Hub.Domain.Services;
 using System.Linq;
 
 namespace Api.Hub.Domain.GameDomain
@@ -18,6 +17,7 @@ namespace Api.Hub.Domain.GameDomain
             var players = _playersService.GetPlayers();
 
             // ToList is necessary to create copy of the list,so we dont modify enumerable while iterating
+            // Select only players (not NPC) to reduce computation conplexity from O(x^2) (its actually the same, but in worst case, in best one its nearly O(x))
             foreach (var player in players.Where(p => p.IsNpc == false).ToList())
             {
                 foreach (var opponent in players.ToList())
@@ -27,6 +27,8 @@ namespace Api.Hub.Domain.GameDomain
                         continue; // skip myself
                     }
 
+                    // Check if current player can kill other, which is not marked as dead
+                    // Marking IsDown is needed, so in some cases we don't try to kill already killed player (which is disconnected)
                     if (player.TryKill(opponent) && !player.IsDown)
                     {
                         opponent.IsDown = true;
@@ -37,6 +39,18 @@ namespace Api.Hub.Domain.GameDomain
                         }
 
                         _playersService.KillPlayer(opponent);
+                    }
+                    // now lets check opposite - if NPC or opponent can kill player
+                    else if (opponent.TryKill(player) && !opponent.IsDown)
+                    {
+                        player.IsDown = true;
+
+                        if (opponent is Player killer)
+                        {
+                            _playersService.UpdateStats(killer, player);
+                        }
+
+                        _playersService.KillPlayer(player);
                     }
                 }
             }

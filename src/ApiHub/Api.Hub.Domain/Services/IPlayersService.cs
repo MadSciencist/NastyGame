@@ -16,5 +16,6 @@ namespace Api.Hub.Domain.Services
         void KillPlayer(PlayerBase player);
         void UpdateStats(PlayerBase killer, PlayerBase victim);
         event EventHandler<Player> PlayerRemoved;
+        event EventHandler<Player> PlayerScored;
     }
 }

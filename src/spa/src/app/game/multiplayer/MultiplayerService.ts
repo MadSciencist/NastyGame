@@ -39,6 +39,10 @@ export default class MultiplayerService {
       this.conn.stop();
       // this.lostGame();
     });
+
+    this.conn.on("Scored", (scoredDto: PlayerDto) => {
+      console.log(scoredDto);
+    });
   }
 
   public updateMyPosition(bubble: PlayerBubble) {
