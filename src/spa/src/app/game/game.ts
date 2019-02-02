@@ -2,11 +2,13 @@ import { Mouse } from "./controls/Mouse";
 import { Vector } from "./models/Vector";
 import { IPoint } from "./models/IPoint";
 import { IVector } from "./models/IVector";
-import Bubble from "./Bubble";
 import MultiplayerService from "./multiplayer/MultiplayerService";
 import EnemyBubbleDto from "./multiplayer/EnemyBubbleDto";
 import Constants from "./Constants";
 import GameConfig from "./GameConfig";
+import OpponentBubble from "./models/OpponentBubble";
+import PlayerBubble from "./models/PlayerBubble";
+import BubbleBase from "./models/BubbleBase";
 
 export class Game {
   private multiplayer: MultiplayerService;
@@ -14,8 +16,8 @@ export class Game {
   private ctx: CanvasRenderingContext2D | null;
   private mouse: Mouse;
   private mousePos: IPoint = { x: Constants.CanvasSize / 2, y: Constants.CanvasSize / 2 };
-  private bubble: Bubble;
-  private serverBubbles: Array<Bubble> = [];
+  private bubble: PlayerBubble;
+  private serverBubbles: Array<BubbleBase> = [];
   private prevPos: IVector;
   private gameConfig: GameConfig;
 
@@ -33,16 +35,9 @@ export class Game {
       });
 
       this.prevPos = Vector.CreateVector(initalPos);
-      this.bubble = new Bubble(
-        this.ctx!,
-        initalPos,
-        this.gameConfig.initialRadius, // this is a little redundant
-        this.gameConfig.registeredName, // but bubbles mapped from enemiesDto
-        this.gameConfig.connectionId, // require this type of constructor
-        this.gameConfig // and overloading ctor in JS might be pointless
-      );
+      this.bubble = new PlayerBubble(this.ctx!, initalPos, this.gameConfig);
 
-      setInterval(this.loop.bind(this), 50);
+      setInterval(this.loop.bind(this), 25);
     });
 
     this.multiplayer.onLost(() => {
@@ -52,8 +47,8 @@ export class Game {
 
     this.multiplayer.onEnemiesUpdated((enemies: Array<EnemyBubbleDto>) => {
       this.serverBubbles = enemies.map(
-        (enemy: EnemyBubbleDto): Bubble => {
-          return new Bubble(
+        (enemy: EnemyBubbleDto): OpponentBubble => {
+          return new OpponentBubble(
             this.ctx!,
             new Vector(enemy.Position),
             enemy.Radius,
@@ -69,6 +64,13 @@ export class Game {
     window.addEventListener("mousemove", (e: MouseEvent) => {
       this.mousePos = this.mouse.getPosition(e);
     });
+  }
+
+  private drawStatistics() {
+    // TODO this
+    this.ctx!.font = "10px Arial";
+    this.ctx!.fillStyle = "white";
+    this.ctx!.fillText(this.gameConfig.connectionId, 10, 50);
   }
 
   private loop() {
@@ -93,6 +95,8 @@ export class Game {
     const dx = this.bubble.pos.cord.x - this.prevPos.cord.x;
     const dy = this.bubble.pos.cord.y - this.prevPos.cord.y;
     this.ctx!.translate(-dx, -dy);
+
+    this.drawStatistics();
 
     this.prevPos.cord.x = this.bubble.pos.cord.x;
     this.prevPos.cord.y = this.bubble.pos.cord.y;

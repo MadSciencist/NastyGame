@@ -1,11 +1,11 @@
 import * as SignalR from "@aspnet/signalr";
 import * as MsgPack from "@aspnet/signalr-protocol-msgpack";
 import Constants from "../Constants";
-import Bubble from "../Bubble";
 import BubbleDto from "./BubbleDto";
 import EnemyBubbleDto from "./EnemyBubbleDto";
 import { GameConfigDto } from "./GameConfigDto";
 import GameConfig from "../GameConfig";
+import PlayerBubble from "../models/PlayerBubble";
 
 export default class MultiplayerService {
   private conn: SignalR.HubConnection;
@@ -39,7 +39,7 @@ export default class MultiplayerService {
     });
   }
 
-  public updateMyPosition(bubble: Bubble) {
+  public updateMyPosition(bubble: PlayerBubble) {
     if (this.conn.state === SignalR.HubConnectionState.Connected) {
       const bubbleDto = new BubbleDto(bubble);
 

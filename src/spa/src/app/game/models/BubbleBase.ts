@@ -1,14 +1,14 @@
-import { IPoint } from "./models/IPoint";
-import { Vector } from "./models/Vector";
-import Constants from "./Constants";
-import GameConfig from "./GameConfig";
+import { Vector } from "./Vector";
+import GameConfig from "../GameConfig";
+import Constants from "../Constants";
+import { IPoint } from "./IPoint";
 
-export default class Bubble {
+export default class BubbleBase {
   public pos: Vector;
   public radius: number;
   public name: string;
-  public connectionId: string;
   private config: GameConfig;
+  public connectionId: string;
 
   private ctx: CanvasRenderingContext2D | null;
 
@@ -17,15 +17,15 @@ export default class Bubble {
     vect: Vector,
     radius: number,
     name: string,
-    connectionId: string,
+    connId: string,
     config: GameConfig
   ) {
     this.ctx = ctx;
     this.pos = vect;
     this.radius = radius;
     this.name = name;
+    this.connectionId = connId;
     this.config = config;
-    this.connectionId = connectionId;
   }
 
   public update(velocity: IPoint) {
@@ -44,25 +44,9 @@ export default class Bubble {
     this.pos.cord.y = this.constrain(this.pos.cord.y, 0, this.config.worldHeight);
   }
 
-  private constrain(input: number, min: number, max: number): number {
+  protected constrain(input: number, min: number, max: number): number {
     return Math.max(Math.min(input, max), min);
   }
-
-  /*
-  /* This was moved to server-side to prevent cheating
-  public canEat(opponent: Bubble): boolean {
-    const distance = this.pos.distance(opponent.pos);
-
-    if (distance < this.radius + opponent.radius) {
-      const totalArea =
-        Math.PI * this.radius * this.radius + Math.PI * opponent.radius * opponent.radius;
-      this.radius = Math.sqrt(totalArea / Math.PI);
-      return true;
-    } else {
-      return false;
-    }
-  }
-  */
 
   public show() {
     this.ctx!.beginPath();

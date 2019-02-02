@@ -27,7 +27,7 @@ namespace Api.Hub.Domain.GameDomain
                         continue; // skip myself
                     }
 
-                    if (player.CanBeat(opponent) && !player.IsDown)
+                    if (player.TryKill(opponent) && !player.IsDown)
                     {
                         opponent.IsDown = true;
                         Console.WriteLine($"Player: {player.Name} killed: {opponent?.Name}");

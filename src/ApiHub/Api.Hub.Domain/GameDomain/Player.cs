@@ -20,20 +20,17 @@ namespace Api.Hub.Domain.GameDomain
             Bubble = new Bubble(bubbleDto);
         }
 
-        public Player(){}
+        public Player(){ }
 
-        public bool CanBeat(Player otherPlayer)
+        public bool TryKill(Player otherPlayer)
         {
             var distance = Bubble.GetDistance(otherPlayer.Bubble);
 
             if (distance < Bubble.Radius + otherPlayer.Bubble.Radius)
             {
-                //var totalArea = Math.PI * Radius * Radius + Math.PI * otherBubble.Radius * otherBubble.Radius;
-                //if(Radius < BubbleConfig.MaxRadius) Radius = Math.Sqrt(totalArea / Math.PI);
+                var totalArea = Math.PI * Bubble.Radius * Bubble.Radius + Math.PI * otherPlayer.Bubble.Radius * otherPlayer.Bubble.Radius;
+                if(Bubble.Radius < BubbleConfig.MaxRadius) Bubble.Radius = Math.Sqrt(totalArea / Math.PI);
 
-                if (Bubble.Radius < BubbleConfig.MaxRadius) Bubble.Radius *= 1.05;
-
-               // Console.WriteLine("Killed");
                 return true;
             }
 
