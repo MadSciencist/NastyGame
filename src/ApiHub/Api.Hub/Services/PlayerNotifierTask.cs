@@ -6,18 +6,21 @@ using System;
 using System.Linq;
 using System.Threading;
 using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameDomain;
 
 namespace Api.Hub.Services
 {
-    public class PlayerNotifierTask : NotifierTaskBase, IPlayerNotifierTask
+    public class PlayerNotifierTask : NotifierTaskBase, INotifierTask
     {
         private readonly IHubContext<GameHub> _gameHub;
+        private readonly IGameplay _gameplay;
         private readonly IPlayersService _playersService;
         private readonly ILogger<PlayerNotifierTask> _logger;
 
-        public PlayerNotifierTask(IHubContext<GameHub> gameHub, IPlayersService players, ILogger<PlayerNotifierTask> logger) : base(logger)
+        public PlayerNotifierTask(IHubContext<GameHub> gameHub, IGameplay gameplay, IPlayersService players, ILogger<PlayerNotifierTask> logger) : base(logger)
         {
             _gameHub = gameHub;
+            _gameplay = gameplay;
             _playersService = players;
             _logger = logger;
         }
@@ -26,10 +29,11 @@ namespace Api.Hub.Services
         {
             try
             {
-                Thread.Sleep(100);
+                Thread.Sleep(20);
 
                 if (_playersService.GetCount() > 0)
                 {
+                    _gameplay.UpdateGameplay();
                     var players = _playersService.GetPlayers().Select(player => new EnemyBubblesDto(player)).ToList();
                     await _gameHub.Clients.All.SendAsync("UpdateEnemies", players);
                 }

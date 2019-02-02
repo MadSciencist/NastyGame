@@ -1,14 +1,12 @@
-﻿using Api.Hub.Domain.DTOs;
-using System;
+﻿using Api.Hub.Domain.GameDomain;
 using System.Collections.Generic;
-using Api.Hub.Domain.GameDomain;
 
 namespace Api.Hub.Domain.Services
 {
     public interface INpcService
     {
-        IList<NpcBubble> GetNpcs();
-        void KillNpc(Guid guid);
-        void KillNpc(NpcBubble victim);
+        IEnumerable<Player> GetDefaultCountOfNpcs();
+        IEnumerable<Player> GenerateNpcs(int count);
+        int GetCountOfNeededNpcs(IEnumerable<Player> players);
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Api.Hub.Domain.Services;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Api.Hub.Domain.GameDomain
 {
@@ -22,24 +22,24 @@ namespace Api.Hub.Domain.GameDomain
         public void UpdateGameplay()
         {
             var players = _playersService.GetPlayers();
-            var npcs = _npcService.GetNpcs();
 
-            var markedToKill = new List<NpcBubble>();
-
-            foreach (var player in players)
+            // ToList is necessary to create copy of the list,so we dont modify enumerable while iterating
+            foreach (var player in players.ToList())
             {
-                foreach (var npc in npcs)
+                foreach (var opponent in players.ToList())
                 {
-                    if (player.Bubble.CanBeat(npc.Bubble))
+                    if (player == opponent)
                     {
-                        markedToKill.Add(npc);
-                    }
-                }
-            }
+                        continue;
+                    } // skip myself
 
-            foreach (var kill in markedToKill)
-            {
-                _npcService.KillNpc(kill);
+                    if (player.Bubble.CanBeat(opponent.Bubble))
+                    {
+                        if (opponent.IsNpc)
+                            _playersService.KillPlayer(opponent);
+                    }
+                    //if (opponent.Bubble.CanBeat(player.Bubble)) markedToKill.Add(player);
+                }
             }
         }
     }

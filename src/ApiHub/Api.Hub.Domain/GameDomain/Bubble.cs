@@ -1,5 +1,6 @@
 ﻿using System;
 using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameConfig;
 
 namespace Api.Hub.Domain.GameDomain
 {
@@ -31,8 +32,9 @@ namespace Api.Hub.Domain.GameDomain
             if (distance < Radius + otherBubble.Radius)
             {
                 var totalArea = Math.PI * Radius * Radius + Math.PI * otherBubble.Radius * otherBubble.Radius;
-                Radius = Math.Sqrt(totalArea / Math.PI);
+                if(Radius < BubbleConfig.MaxRadius) Radius = Math.Sqrt(totalArea / Math.PI);
 
+                Console.WriteLine("Killed");
                 return true;
             }
 
@@ -43,6 +45,7 @@ namespace Api.Hub.Domain.GameDomain
         {
             var deltaX = Position.x - other.Position.x;
             var deltaY = Position.y - other.Position.y;
+
             return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
         }
     }

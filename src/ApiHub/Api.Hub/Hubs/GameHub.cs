@@ -4,21 +4,20 @@ using Api.Hub.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hub.Hubs
 {
     public class GameHub : Microsoft.AspNetCore.SignalR.Hub
     {
         private readonly IPlayersService _playersService;
-        private readonly IPlayerNotifierTask _playersNotifier;
-        private readonly INpcSpawnerTask _npcSpawner;
+        private readonly INotifierTask _playersNotifier;
         private readonly ILogger<GameHub> _logger;
 
-        public GameHub(IPlayersService players, IPlayerNotifierTask playersNotifier, INpcSpawnerTask npcSpawner, ILogger<GameHub> logger)
+        public GameHub(IPlayersService players, INotifierTask playersNotifier, ILogger<GameHub> logger)
         {
             _playersService = players;
             _playersNotifier = playersNotifier;
-            _npcSpawner = npcSpawner;
             _logger = logger;
         }
 
@@ -47,16 +46,14 @@ namespace Api.Hub.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public void RegisterName(string name)
+        public GameConfigDto RegisterName(string name)
         {
             _playersService.SetName(Context.ConnectionId, name);
+            return new GameConfigDto(name);
         }
 
-        public void Update(BubbleDto bubble)
-        {
-            _playersService.Update(Context.ConnectionId, bubble);
-        }
-
+        public void Update(BubbleDto bubble) => _playersService.Update(Context.ConnectionId, bubble);
+        
         private void StartCyclicTasks()
         {
             _logger.LogInformation($"Starting cyclic tasks");
@@ -66,10 +63,6 @@ namespace Api.Hub.Hubs
                 if (_playersNotifier.State == NotifierState.Stopped)
                 {
                     _playersNotifier.Start();
-                }
-                if (_npcSpawner.State == NotifierState.Stopped)
-                {
-                    _npcSpawner.Start();
                 }
             }
         }
@@ -83,10 +76,6 @@ namespace Api.Hub.Hubs
                 if (_playersNotifier.State == NotifierState.Started)
                 {
                     _playersNotifier.Stop();
-                }
-                if (_npcSpawner.State == NotifierState.Started)
-                {
-                    _npcSpawner.Stop();
                 }
             }
         }

@@ -1,26 +1,52 @@
 import { IPoint } from "./models/IPoint";
 import { Vector } from "./models/Vector";
+import { GameConfigDto } from "./multiplayer/GameConfigDto";
+import Constants from "./Constants";
 
 export default class Bubble {
   public pos: Vector;
   public radius: number;
   public name: string;
+  private config: GameConfigDto;
 
   private ctx: CanvasRenderingContext2D | null;
 
-  constructor(ctx: CanvasRenderingContext2D, vect: Vector, radius: number, name: string) {
+  constructor(
+    ctx: CanvasRenderingContext2D,
+    vect: Vector,
+    radius: number,
+    name: string,
+    config: GameConfigDto
+  ) {
     this.ctx = ctx;
     this.pos = vect;
     this.radius = radius;
     this.name = name;
+    this.config = config;
   }
 
   public update(velocity: IPoint) {
-    const velocityVector = new Vector({ x: velocity.x - 200, y: velocity.y - 200 });
+    const velocityVector = new Vector({
+      x: velocity.x - Constants.CanvasSize / 2,
+      y: velocity.y - Constants.CanvasSize / 2
+    });
     velocityVector.applyMagnitude(3);
     this.pos.add(velocityVector);
+    this.bound();
   }
 
+  // this function creates boundaries, so we don't exceed map size
+  public bound() {
+    this.pos.cord.x = this.constrain(this.pos.cord.x, 0, this.config.WorldWidth);
+    this.pos.cord.y = this.constrain(this.pos.cord.y, 0, this.config.WorldHeight);
+  }
+
+  private constrain(input: number, min: number, max: number): number {
+    return Math.max(Math.min(input, max), min);
+  }
+
+  /*
+  /* This was moved to server-side to prevent cheating
   public canEat(opponent: Bubble): boolean {
     const distance = this.pos.distance(opponent.pos);
 
@@ -33,6 +59,7 @@ export default class Bubble {
       return false;
     }
   }
+  */
 
   public show() {
     this.ctx!.beginPath();

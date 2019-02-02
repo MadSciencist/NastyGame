@@ -75,9 +75,8 @@ namespace Api.Hub
 
             services.AddSingleton<IUserIdProvider, UserIdProvider>();
             services.AddSingleton<IPlayersService, PlayersService>();
-            services.AddSingleton<IPlayerNotifierTask, PlayerNotifierTask>();
-            services.AddSingleton<INpcSpawnerTask, NpcSpawnerTask>();
-            services.AddSingleton<INpcService, NpcService>();
+            services.AddSingleton<INotifierTask, PlayerNotifierTask>();
+            services.AddTransient<INpcService, NpcService>();
             services.AddSingleton<IGameplay, Gameplay>();
         }
 

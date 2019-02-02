@@ -4,13 +4,13 @@ import Constants from "../Constants";
 import Bubble from "../Bubble";
 import BubbleDto from "./BubbleDto";
 import EnemyBubbleDto from "./EnemyBubbleDto";
-import NpcBubbleDto from "./NpcBubbleDto";
+import { GameConfigDto } from "./GameConfigDto";
 
 export default class MultiplayerService {
   private conn: SignalR.HubConnection;
   // private token: string;
   private enemiesUpdated: (dto: Array<EnemyBubbleDto>) => void;
-  private npcsUpdated: (dto: Array<NpcBubbleDto>) => void;
+  private connectionStarted: (dto: GameConfigDto) => void;
 
   constructor() {
     // this.token =
@@ -30,10 +30,6 @@ export default class MultiplayerService {
     this.conn.on("UpdateEnemies", (enemies: Array<EnemyBubbleDto>) => {
       this.enemiesUpdated(enemies);
     });
-
-    this.conn.on("SpawnNpcs", (npcs: Array<NpcBubbleDto>) => {
-      this.npcsUpdated(npcs);
-    });
   }
 
   public updateMyPosition(bubble: Bubble) {
@@ -44,24 +40,28 @@ export default class MultiplayerService {
     }
   }
 
-  private registerNickname(name: string) {
-    if (this.conn.state === SignalR.HubConnectionState.Connected) {
-      this.conn.invoke("RegisterName", name).catch(this.errorHandler.bind(this));
-    }
-  }
-
   // function to register callback by clients
   public onEnemiesUpdated(callback: (position: Array<EnemyBubbleDto>) => void): void {
     this.enemiesUpdated = callback;
   }
 
-  public onNpcsUpdated(callback: (dto: Array<NpcBubbleDto>) => void): void {
-    this.npcsUpdated = callback;
+  public onStarted(callback: (dto: GameConfigDto) => void): void {
+    this.connectionStarted = callback;
   }
 
   private async onConnected() {
     const myName = (<HTMLInputElement>document.getElementById("nick-input")).value as string;
-    await this.registerNickname(myName);
+    const params: GameConfigDto = await this.registerNickname(myName);
+    this.connectionStarted(params);
+    console.log(params);
+  }
+
+  private async registerNickname(name: string): Promise<any> {
+    if (this.conn.state === SignalR.HubConnectionState.Connected) {
+      return this.conn
+        .invoke<GameConfigDto>("RegisterName", name)
+        .catch(this.errorHandler.bind(this));
+    }
   }
 
   private errorHandler(err: any): void {

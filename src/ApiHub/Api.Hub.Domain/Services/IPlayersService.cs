@@ -12,5 +12,6 @@ namespace Api.Hub.Domain.Services
         IList<Player> GetPlayers();
         int GetCount();
         void Update(string connectionId, BubbleDto bubbleDto);
+        void KillPlayer(Player player);
     }
 }
