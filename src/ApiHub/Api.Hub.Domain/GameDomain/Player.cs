@@ -1,5 +1,6 @@
 ﻿using System;
 using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameConfig;
 
 namespace Api.Hub.Domain.GameDomain
 {
@@ -11,7 +12,7 @@ namespace Api.Hub.Domain.GameDomain
         public string Name { get; set; }
         public bool IsAuthenticated { get; set; }
         public bool IsNpc { get; set; } = false;
-        public Guid Guid { get; set; }
+        public bool IsDown { get; set; }
     
         public Player(string connectionId, BubbleDto bubbleDto)
         {
@@ -20,5 +21,23 @@ namespace Api.Hub.Domain.GameDomain
         }
 
         public Player(){}
+
+        public bool CanBeat(Player otherPlayer)
+        {
+            var distance = Bubble.GetDistance(otherPlayer.Bubble);
+
+            if (distance < Bubble.Radius + otherPlayer.Bubble.Radius)
+            {
+                //var totalArea = Math.PI * Radius * Radius + Math.PI * otherBubble.Radius * otherBubble.Radius;
+                //if(Radius < BubbleConfig.MaxRadius) Radius = Math.Sqrt(totalArea / Math.PI);
+
+                if (Bubble.Radius < BubbleConfig.MaxRadius) Bubble.Radius *= 1.05;
+
+               // Console.WriteLine("Killed");
+                return true;
+            }
+
+            return false;
+        }
     }
 }

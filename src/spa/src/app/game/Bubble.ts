@@ -1,13 +1,14 @@
 import { IPoint } from "./models/IPoint";
 import { Vector } from "./models/Vector";
-import { GameConfigDto } from "./multiplayer/GameConfigDto";
 import Constants from "./Constants";
+import GameConfig from "./GameConfig";
 
 export default class Bubble {
   public pos: Vector;
   public radius: number;
   public name: string;
-  private config: GameConfigDto;
+  public connectionId: string;
+  private config: GameConfig;
 
   private ctx: CanvasRenderingContext2D | null;
 
@@ -16,13 +17,15 @@ export default class Bubble {
     vect: Vector,
     radius: number,
     name: string,
-    config: GameConfigDto
+    connectionId: string,
+    config: GameConfig
   ) {
     this.ctx = ctx;
     this.pos = vect;
     this.radius = radius;
     this.name = name;
     this.config = config;
+    this.connectionId = connectionId;
   }
 
   public update(velocity: IPoint) {
@@ -37,8 +40,8 @@ export default class Bubble {
 
   // this function creates boundaries, so we don't exceed map size
   public bound() {
-    this.pos.cord.x = this.constrain(this.pos.cord.x, 0, this.config.WorldWidth);
-    this.pos.cord.y = this.constrain(this.pos.cord.y, 0, this.config.WorldHeight);
+    this.pos.cord.x = this.constrain(this.pos.cord.x, 0, this.config.worldWidth);
+    this.pos.cord.y = this.constrain(this.pos.cord.y, 0, this.config.worldHeight);
   }
 
   private constrain(input: number, min: number, max: number): number {

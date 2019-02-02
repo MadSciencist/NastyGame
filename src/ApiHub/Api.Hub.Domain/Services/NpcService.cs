@@ -15,7 +15,7 @@ namespace Api.Hub.Domain.Services
 
         public int GetCountOfNeededNpcs(IEnumerable<Player> players)
         {
-            var npcsNow = players.Count(x => x.IsNpc);
+            var npcsNow = players.ToList().Count(x => x.IsNpc);
             return BubbleConfig.MaxNpcs - npcsNow; // generate only missing NPCs - probably this will be about 1
 
             // Generate random number of NPCs - need to test both approaches
@@ -41,7 +41,7 @@ namespace Api.Hub.Domain.Services
                 var posY = random.Next(0, CanvasConfig.WorldHeight);
                 var position = new Point2D(posX, posY);
 
-                npcs.Add(new Player { Guid = Guid.NewGuid(), Bubble = new Bubble { Radius = radius, Position = position }, IsNpc = true});
+                npcs.Add(new Player { Bubble = new Bubble { Radius = radius, Position = position }, IsNpc = true});
             }
 
             return npcs;

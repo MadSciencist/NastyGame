@@ -5,12 +5,14 @@ import Bubble from "../Bubble";
 import BubbleDto from "./BubbleDto";
 import EnemyBubbleDto from "./EnemyBubbleDto";
 import { GameConfigDto } from "./GameConfigDto";
+import GameConfig from "../GameConfig";
 
 export default class MultiplayerService {
   private conn: SignalR.HubConnection;
   // private token: string;
   private enemiesUpdated: (dto: Array<EnemyBubbleDto>) => void;
-  private connectionStarted: (dto: GameConfigDto) => void;
+  private connectionStarted: (dto: GameConfig) => void;
+  private lostGame: () => void;
 
   constructor() {
     // this.token =
@@ -30,6 +32,11 @@ export default class MultiplayerService {
     this.conn.on("UpdateEnemies", (enemies: Array<EnemyBubbleDto>) => {
       this.enemiesUpdated(enemies);
     });
+
+    this.conn.on("Lost", (e: string) => {
+      this.conn.stop();
+      this.lostGame();
+    });
   }
 
   public updateMyPosition(bubble: Bubble) {
@@ -45,15 +52,18 @@ export default class MultiplayerService {
     this.enemiesUpdated = callback;
   }
 
-  public onStarted(callback: (dto: GameConfigDto) => void): void {
+  public onStarted(callback: (dto: GameConfig) => void): void {
     this.connectionStarted = callback;
+  }
+
+  public async onLost(callback: () => void) {
+    this.lostGame = callback;
   }
 
   private async onConnected() {
     const myName = (<HTMLInputElement>document.getElementById("nick-input")).value as string;
-    const params: GameConfigDto = await this.registerNickname(myName);
-    this.connectionStarted(params);
-    console.log(params);
+    const configDto: GameConfigDto = await this.registerNickname(myName);
+    this.connectionStarted(new GameConfig(configDto));
   }
 
   private async registerNickname(name: string): Promise<any> {

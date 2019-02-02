@@ -23,6 +23,12 @@ namespace Api.Hub.Services
             _gameplay = gameplay;
             _playersService = players;
             _logger = logger;
+            _playersService.PlayerRemoved += PlayersServiceOnPlayerRemoved;
+        }
+
+        private async void PlayersServiceOnPlayerRemoved(object sender, string e)
+        {
+            await _gameHub.Clients.Client(e).SendAsync("Lost", "lolololo");
         }
 
         protected override async void Execute()

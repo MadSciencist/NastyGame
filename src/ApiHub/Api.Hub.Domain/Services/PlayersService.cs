@@ -1,6 +1,8 @@
 ﻿using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameConfig;
 using Api.Hub.Domain.GameDomain;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,6 +10,7 @@ namespace Api.Hub.Domain.Services
 {
     public class PlayersService : IPlayersService
     {
+        public event EventHandler<string> PlayerRemoved;
         private readonly INpcService _npcService;
         private readonly ILogger<PlayersService> _logger;
         private readonly List<Player> _players;
@@ -33,14 +36,18 @@ namespace Api.Hub.Domain.Services
                 RemovePlayer(connectionId);
             }
 
-            var defaultBubble = new Bubble { Position = new Point2D(200, 200), Radius = 10 };
-            _players.Add(new Player { ConnectionId = connectionId, Bubble = defaultBubble, IsAuthenticated = isAuthenticated });
+            var defaultBubble = new Bubble { Position = new Point2D((double)CanvasConfig.WorldWidth / 2, (double)CanvasConfig.WorldHeight / 2), Radius = BubbleConfig.InitialPlayerRadius };
+            _players.Add(new Player { ConnectionId = connectionId, IsNpc = false, Bubble = defaultBubble, IsAuthenticated = isAuthenticated });
 
             _logger.LogInformation($"Added player: {connectionId}, isAuth: {isAuthenticated}.");
         }
 
         public void KillPlayer(Player player)
         {
+            // update this client that he lost
+            if (player.IsNpc == false)
+                PlayerRemoved?.Invoke(this, player.ConnectionId);
+
             _players.Remove(player);
         }
 
@@ -67,9 +74,11 @@ namespace Api.Hub.Domain.Services
             {
                 _logger.LogInformation($"Player: {connectionId} doesnt exist.");
             }
-
-            _players.Remove(player);
-            _logger.LogInformation($"Removed player: {connectionId} name: {player?.Name}");
+            else
+            {
+                _players.Remove(player);
+                _logger.LogInformation($"Removed player: {connectionId} name: {player?.Name}");
+            }
         }
 
         public void Update(string connectionId, BubbleDto bubbleDto)

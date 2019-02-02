@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Game } from "../../game/Game";
-import Constants from "app/game/Constants";
+import Constants from "../../game/Constants";
 
 class GameCanvas extends React.Component {
   constructor(props: any) {

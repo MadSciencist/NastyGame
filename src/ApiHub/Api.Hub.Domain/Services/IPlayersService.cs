@@ -1,4 +1,5 @@
-﻿using Api.Hub.Domain.DTOs;
+﻿using System;
+using Api.Hub.Domain.DTOs;
 using Api.Hub.Domain.GameDomain;
 using System.Collections.Generic;
 
@@ -13,5 +14,6 @@ namespace Api.Hub.Domain.Services
         int GetCount();
         void Update(string connectionId, BubbleDto bubbleDto);
         void KillPlayer(Player player);
+        event EventHandler<string> PlayerRemoved;
     }
 }

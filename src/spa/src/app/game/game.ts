@@ -5,8 +5,8 @@ import { IVector } from "./models/IVector";
 import Bubble from "./Bubble";
 import MultiplayerService from "./multiplayer/MultiplayerService";
 import EnemyBubbleDto from "./multiplayer/EnemyBubbleDto";
-import { GameConfigDto } from "./multiplayer/GameConfigDto";
 import Constants from "./Constants";
+import GameConfig from "./GameConfig";
 
 export class Game {
   private multiplayer: MultiplayerService;
@@ -17,15 +17,15 @@ export class Game {
   private bubble: Bubble;
   private serverBubbles: Array<Bubble> = [];
   private prevPos: IVector;
-  private gameConfig: GameConfigDto;
+  private gameConfig: GameConfig;
 
   constructor() {
     this.canvas = <HTMLCanvasElement>document.getElementById("gameCanvas");
     this.ctx = this.canvas.getContext("2d");
 
     this.multiplayer = new MultiplayerService();
-    this.multiplayer.onStarted((gameConfig: GameConfigDto) => {
-      this.gameConfig = gameConfig;
+    this.multiplayer.onStarted((cfg: GameConfig) => {
+      this.gameConfig = cfg;
 
       const initalPos: Vector = new Vector({
         x: Constants.CanvasSize / 2,
@@ -36,16 +36,21 @@ export class Game {
       this.bubble = new Bubble(
         this.ctx!,
         initalPos,
-        gameConfig.InitialRadius,
-        gameConfig.RegisteredName,
-        gameConfig
+        this.gameConfig.initialRadius, // this is a little redundant
+        this.gameConfig.registeredName, // but bubbles mapped from enemiesDto
+        this.gameConfig.connectionId, // require this type of constructor
+        this.gameConfig // and overloading ctor in JS might be pointless
       );
 
-      setInterval(this.loop.bind(this), 25);
+      setInterval(this.loop.bind(this), 50);
+    });
+
+    this.multiplayer.onLost(() => {
+      alert("You lost");
+      location.reload();
     });
 
     this.multiplayer.onEnemiesUpdated((enemies: Array<EnemyBubbleDto>) => {
-      this.serverBubbles = [];
       this.serverBubbles = enemies.map(
         (enemy: EnemyBubbleDto): Bubble => {
           return new Bubble(
@@ -53,6 +58,7 @@ export class Game {
             new Vector(enemy.Position),
             enemy.Radius,
             enemy.NickName,
+            enemy.ConnectionId,
             this.gameConfig
           );
         }
@@ -74,16 +80,11 @@ export class Game {
     this.bubble.show();
     this.multiplayer.updateMyPosition(this.bubble);
 
-    console.log(this.bubble.pos.cord);
-
     // draw oponents / NPCs
     for (let i = this.serverBubbles.length - 1; i >= 0; i--) {
-      const myName = (<HTMLInputElement>document.getElementById("nick-input")).value as string;
-
-      // dont draw myself, just update radius (to prevent cheating)
-      if (this.serverBubbles[i].name === myName) {
+      if (this.serverBubbles[i].connectionId === this.gameConfig.connectionId) {
         this.bubble.radius = this.serverBubbles[i].radius;
-        continue;
+        continue; // dont draw myself, just update radius (to prevent cheating)
       }
 
       this.serverBubbles[i].show();
@@ -103,14 +104,14 @@ export class Game {
     this.ctx!.fillRect(
       -margin,
       -margin,
-      2 * margin + this.gameConfig.WorldWidth,
-      2 * margin + this.gameConfig.WorldHeight
+      2 * margin + this.gameConfig.worldWidth,
+      2 * margin + this.gameConfig.worldHeight
     );
   }
 
   private drawBoard() {
-    let bw = this.gameConfig.WorldWidth;
-    let bh = this.gameConfig.WorldHeight;
+    let bw = this.gameConfig.worldWidth;
+    let bh = this.gameConfig.worldHeight;
     let p = 20;
 
     for (let x = 0; x <= bw; x += 40) {

@@ -6,6 +6,7 @@ namespace Api.Hub.Domain.DTOs
 {
     public class EnemyBubblesDto
     {
+        public string ConnectionId { get; set; }
         public string NickName { get; set; }
         public Point2D Position { get; set; }
         public double Radius { get; set; }
@@ -15,6 +16,7 @@ namespace Api.Hub.Domain.DTOs
             NickName = player.Name;
             Position = player.Bubble.Position;
             Radius = player.Bubble.Radius;
+            ConnectionId = player.ConnectionId;
         }
 
         // needed for MessagePack serializer

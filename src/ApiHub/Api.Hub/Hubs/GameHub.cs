@@ -4,7 +4,6 @@ using Api.Hub.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hub.Hubs
 {
@@ -26,10 +25,7 @@ namespace Api.Hub.Hubs
             var isAuthenticated = Context.UserIdentifier != null;
             var connectionid = Context.ConnectionId;
             _playersService.AddPlayer(connectionid, isAuthenticated);
-
             _logger.LogInformation($"New connection: {connectionid} isAuth: {isAuthenticated}");
-
-            StartCyclicTasks();
 
             return base.OnConnectedAsync();
         }
@@ -38,9 +34,7 @@ namespace Api.Hub.Hubs
         {
             var connectionid = Context.ConnectionId;
             _playersService.RemovePlayer(connectionid);
-
             StopCyclicTasks();
-
             _logger.LogInformation($"Disconnecting: {connectionid}");
 
             return base.OnDisconnectedAsync(exception);
@@ -49,7 +43,8 @@ namespace Api.Hub.Hubs
         public GameConfigDto RegisterName(string name)
         {
             _playersService.SetName(Context.ConnectionId, name);
-            return new GameConfigDto(name);
+            StartCyclicTasks();
+            return new GameConfigDto(Context.ConnectionId, name);
         }
 
         public void Update(BubbleDto bubble) => _playersService.Update(Context.ConnectionId, bubble);

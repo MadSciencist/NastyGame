@@ -25,22 +25,6 @@ namespace Api.Hub.Domain.GameDomain
         {
         }
 
-        public bool CanBeat(Bubble otherBubble)
-        {
-            var distance = GetDistance(otherBubble);
-
-            if (distance < Radius + otherBubble.Radius)
-            {
-                var totalArea = Math.PI * Radius * Radius + Math.PI * otherBubble.Radius * otherBubble.Radius;
-                if(Radius < BubbleConfig.MaxRadius) Radius = Math.Sqrt(totalArea / Math.PI);
-
-                Console.WriteLine("Killed");
-                return true;
-            }
-
-            return false;
-        }
-
         public double GetDistance(Bubble other)
         {
             var deltaX = Position.x - other.Position.x;

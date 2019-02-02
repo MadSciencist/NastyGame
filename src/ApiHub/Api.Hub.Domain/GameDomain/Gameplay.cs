@@ -1,22 +1,16 @@
-﻿using Api.Hub.Domain.Services;
+﻿using System;
+using Api.Hub.Domain.Services;
 using System.Linq;
 
 namespace Api.Hub.Domain.GameDomain
 {
-    public interface IGameplay
-    {
-        void UpdateGameplay();
-    }
-
     public class Gameplay : IGameplay
     {
         private readonly IPlayersService _playersService;
-        private readonly INpcService _npcService;
 
-        public Gameplay(IPlayersService playersService, INpcService npcService)
+        public Gameplay(IPlayersService playersService)
         {
             _playersService = playersService;
-            _npcService = npcService;
         }
 
         public void UpdateGameplay()
@@ -24,21 +18,21 @@ namespace Api.Hub.Domain.GameDomain
             var players = _playersService.GetPlayers();
 
             // ToList is necessary to create copy of the list,so we dont modify enumerable while iterating
-            foreach (var player in players.ToList())
+            foreach (var player in players.Where(p => p.IsNpc == false).ToList())
             {
                 foreach (var opponent in players.ToList())
                 {
                     if (player == opponent)
                     {
-                        continue;
-                    } // skip myself
-
-                    if (player.Bubble.CanBeat(opponent.Bubble))
-                    {
-                        if (opponent.IsNpc)
-                            _playersService.KillPlayer(opponent);
+                        continue; // skip myself
                     }
-                    //if (opponent.Bubble.CanBeat(player.Bubble)) markedToKill.Add(player);
+
+                    if (player.CanBeat(opponent) && !player.IsDown)
+                    {
+                        opponent.IsDown = true;
+                        Console.WriteLine($"Player: {player.Name} killed: {opponent?.Name}");
+                        _playersService.KillPlayer(opponent);
+                    }
                 }
             }
         }
