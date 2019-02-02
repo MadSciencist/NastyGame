@@ -1,4 +1,5 @@
 ﻿using Api.Hub.Domain.DTOs;
+using System;
 
 namespace Api.Hub.Domain.GameDomain
 {
@@ -19,6 +20,15 @@ namespace Api.Hub.Domain.GameDomain
             Radius = bubble.Radius;
         }
 
-        public Bubble(){ }
+        public Bubble() { }
+
+        public double GetDistance(Bubble other)
+        {
+            var deltaX = Position.x - other.Position.x;
+            var deltaY = Position.y - other.Position.y;
+
+            return Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+        }
     }
 }
+

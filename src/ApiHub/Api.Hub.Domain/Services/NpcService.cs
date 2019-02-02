@@ -1,5 +1,4 @@
-﻿using Api.Hub.Domain.DTOs;
-using Api.Hub.Domain.GameConfig;
+﻿using Api.Hub.Domain.GameConfig;
 using Api.Hub.Domain.GameDomain;
 using System;
 using System.Collections.Generic;
@@ -9,49 +8,42 @@ namespace Api.Hub.Domain.Services
 {
     public class NpcService : INpcService
     {
-        private readonly IList<NpcBubble> _npcs;
+        public IEnumerable<NpcPlayer> GetDefaultCountOfNpcs() => GenerateNpcs(BubbleConfig.MaxNpcs);
 
-        public NpcService()
+        public int GetCountOfNeededNpcs(IEnumerable<PlayerBase> players)
         {
-            _npcs = new List<NpcBubble>(BubbleConfig.MaxNpcs);
-            GenerateNpcs(BubbleConfig.MaxNpcs);
+            // ReSharper disable once RemoveToList.2
+            var npcsNow = players.ToList().Count(x => x.IsNpc);
+
+            return BubbleConfig.MaxNpcs - npcsNow; // generate only missing NPCs - probably this will be about 1
+
+            // Generate random number of NPCs - need to test both approaches
+            //if (npcsNow < BubbleConfig.MinNpcs)
+            //{
+            //    var random = new Random(333);
+            //    var countToAdd = random.Next((BubbleConfig.MaxNpcs - npcsNow) / 2,
+            //        BubbleConfig.MaxNpcs - npcsNow); // add something between half of missing to full set
+
+            //    return countToAdd;
+            //}
         }
 
-        public IList<NpcBubble> GetNpcs()
+        public IEnumerable<NpcPlayer> GenerateNpcs(int count)
         {
-            if (_npcs.Count < BubbleConfig.MinNpcs)
-            {
-                var random = new Random();
-
-                var countToAdd = random.Next((BubbleConfig.MaxNpcs - _npcs.Count) / 2,
-                    BubbleConfig.MaxNpcs - _npcs.Count); // add something between half of missing to full set
-
-                GenerateNpcs(countToAdd);
-            }
-
-            return _npcs;
-        }
-
-        public void KillNpc(Guid guid)
-        {
-            var victim = _npcs.FirstOrDefault(v => v.Guid == guid);
-            if(victim != null) _npcs.Remove(victim);
-        }
-
-        private void GenerateNpcs(int count)
-        {
+            var npcs = new List<NpcPlayer>();
             var random = new Random();
 
             for (var i = 0; i < count; i++)
             {
-                var radius = random.Next(BubbleConfig.MinRadius, BubbleConfig.MaxRadius);
-                var posX = random.Next(0, CanvasConfig.CanvasWidth);
-                var posY = random.Next(0, CanvasConfig.CanvasHeight);
+                var radius = random.Next(BubbleConfig.MinNpcInitialRadius, BubbleConfig.MaxNpcInitialRadius);
+                var posX = random.Next(0, CanvasConfig.WorldWidth);
+                var posY = random.Next(0, CanvasConfig.WorldHeight);
                 var position = new Point2D(posX, posY);
 
-                _npcs.Add(new NpcBubble
-                    { Guid = Guid.NewGuid(), Bubble = new Bubble {Radius = radius, Position = position}});
+                npcs.Add(new NpcPlayer { Bubble = new Bubble { Radius = radius, Position = position }, IsNpc = true });
             }
+
+            return npcs;
         }
     }
 }

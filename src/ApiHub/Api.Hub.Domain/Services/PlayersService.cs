@@ -1,24 +1,32 @@
 ﻿using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameConfig;
 using Api.Hub.Domain.GameDomain;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Api.Hub.Domain.Services
 {
     public class PlayersService : IPlayersService
     {
+        public event EventHandler<Player> PlayerRemoved;
+        public event EventHandler<Player> PlayerScored;
+        private readonly INpcService _npcService;
         private readonly ILogger<PlayersService> _logger;
-        private readonly IList<Player> _players;
+        private readonly List<PlayerBase> _players;
 
-        public PlayersService(ILogger<PlayersService> logger)
+        public PlayersService(INpcService npcService, ILogger<PlayersService> logger)
         {
+            _npcService = npcService;
             _logger = logger;
-            _players = new List<Player>();
+            _players = new List<PlayerBase>();
+            _players.AddRange(npcService.GetDefaultCountOfNpcs());
         }
 
         public int GetCount() => _players.Count;
-        public IList<Player> GetPlayers() => _players;
+        public IList<PlayerBase> GetPlayers() => _players;
 
         public void AddPlayer(string connectionId, bool isAuthenticated)
         {
@@ -30,10 +38,45 @@ namespace Api.Hub.Domain.Services
                 RemovePlayer(connectionId);
             }
 
-            var defaultBubble = new Bubble { Position = new Point2D(200, 200), Radius = 20 };
-            _players.Add(new Player { ConnectionId = connectionId, Bubble = defaultBubble, IsAuthenticated = isAuthenticated });
+            var defaultBubble = new Bubble { Position = new Point2D((double)CanvasConfig.WorldWidth / 2, (double)CanvasConfig.WorldHeight / 2), Radius = BubbleConfig.InitialPlayerRadius };
+
+            _players.Add(new Player
+            {
+                ConnectionId = connectionId,
+                IsNpc = false,
+                Bubble = defaultBubble,
+                IsAuthenticated = isAuthenticated,
+                JoinedTime = DateTime.UtcNow,
+                Score = 0,
+                Victims = new List<string>()
+            });
 
             _logger.LogInformation($"Added player: {connectionId}, isAuth: {isAuthenticated}.");
+        }
+
+        public void UpdateStats(PlayerBase killer, PlayerBase victim)
+        {
+            if (killer is Player murderer)
+            {
+                murderer.Score++;
+                if (victim is Player vict)
+                {
+                    murderer.Victims.Add(vict.Name);
+                    vict.KilledBy = murderer.Name;
+                }
+
+                PlayerScored?.Invoke(this, murderer);
+            }
+        }
+
+        public void KillPlayer(PlayerBase player)
+        {
+            if (player is Player victim)
+            {
+                PlayerRemoved?.Invoke(this, victim);
+            }             
+
+            _players.Remove(player);
         }
 
         public void SetName(string connectionId, string name)
@@ -53,20 +96,7 @@ namespace Api.Hub.Domain.Services
 
         public void RemovePlayer(string connectionId)
         {
-            var player = _players.FirstOrDefault(p => p.ConnectionId == connectionId);
-
-            if (player == null)
-            {
-                _logger.LogInformation($"Player: {connectionId} doesnt exist.");
-            }
-
-            _players.Remove(player);
-            _logger.LogInformation($"Removed player: {connectionId} name: {player?.Name}");
-        }
-
-        public void Update(string connectionId, BubbleDto bubbleDto)
-        {
-            var player = _players.FirstOrDefault(p => p.ConnectionId == connectionId);
+            var player = _players.ToList().FirstOrDefault(p => p.ConnectionId == connectionId);
 
             if (player == null)
             {
@@ -74,7 +104,24 @@ namespace Api.Hub.Domain.Services
             }
             else
             {
-                player.Bubble = new Bubble(bubbleDto);
+                _players.Remove(player);
+                _logger.LogInformation($"Removed player: {connectionId} name: {player?.Name}");
+            }
+        }
+
+        public void Update(string connectionId, BubbleDto bubbleDto)
+        {
+            var player = _players.ToList().FirstOrDefault(p => p.ConnectionId == connectionId);
+
+            if (player == null)
+            {
+                _logger.LogInformation($"Player: {connectionId} doesnt exist.");
+            }
+            else
+            {
+                player.Bubble.Position = bubbleDto.Position;
+                var neededNpcs = _npcService.GetCountOfNeededNpcs(_players);
+                _players.AddRange(_npcService.GenerateNpcs(neededNpcs));
             }
         }
     }

@@ -2,7 +2,7 @@
 {
     public static class CanvasConfig
     {
-        public const int CanvasWidth = 1600;
-        public const int CanvasHeight = 1600;
+        public const int WorldWidth = 800;
+        public const int WorldHeight = 800;
     }
 }

@@ -6,30 +6,46 @@ using System;
 using System.Linq;
 using System.Threading;
 using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameDomain;
 
 namespace Api.Hub.Services
 {
-    public class PlayerNotifierTask : NotifierTaskBase, IPlayerNotifierTask
+    public class PlayerNotifierTask : NotifierTaskBase, INotifierTask
     {
         private readonly IHubContext<GameHub> _gameHub;
+        private readonly IGameplay _gameplay;
         private readonly IPlayersService _playersService;
         private readonly ILogger<PlayerNotifierTask> _logger;
 
-        public PlayerNotifierTask(IHubContext<GameHub> gameHub, IPlayersService players, ILogger<PlayerNotifierTask> logger) : base(logger)
+        public PlayerNotifierTask(IHubContext<GameHub> gameHub, IGameplay gameplay, IPlayersService players, ILogger<PlayerNotifierTask> logger) : base(logger)
         {
             _gameHub = gameHub;
+            _gameplay = gameplay;
             _playersService = players;
             _logger = logger;
+            _playersService.PlayerRemoved += PlayersServiceOnPlayerRemoved;
+            _playersService.PlayerScored += PlayersServiceOnPlayerScored;
+        }
+
+        private async void PlayersServiceOnPlayerScored(object sender, Player player)
+        {
+            await _gameHub.Clients.Client(player.ConnectionId).SendAsync("Scored", new PlayerDto(player));
+        }
+
+        private async void PlayersServiceOnPlayerRemoved(object sender, Player player)
+        {
+            await _gameHub.Clients.Client(player.ConnectionId).SendAsync("Lost", new PlayerDto(player));
         }
 
         protected override async void Execute()
         {
             try
             {
-                Thread.Sleep(100);
+                Thread.Sleep(20);
 
                 if (_playersService.GetCount() > 0)
                 {
+                    _gameplay.UpdateGameplay();
                     var players = _playersService.GetPlayers().Select(player => new EnemyBubblesDto(player)).ToList();
                     await _gameHub.Clients.All.SendAsync("UpdateEnemies", players);
                 }
