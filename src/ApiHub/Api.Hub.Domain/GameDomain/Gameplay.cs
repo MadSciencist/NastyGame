@@ -30,7 +30,12 @@ namespace Api.Hub.Domain.GameDomain
                     if (player.TryKill(opponent) && !player.IsDown)
                     {
                         opponent.IsDown = true;
-                        Console.WriteLine($"Player: {player.Name} killed: {opponent?.Name}");
+
+                        if (player is Player killer)
+                        {
+                            _playersService.UpdateStats(killer, opponent);
+                        }
+
                         _playersService.KillPlayer(opponent);
                     }
                 }

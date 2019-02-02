@@ -5,8 +5,8 @@ namespace Api.Hub.Domain.Services
 {
     public interface INpcService
     {
-        IEnumerable<Player> GetDefaultCountOfNpcs();
-        IEnumerable<Player> GenerateNpcs(int count);
-        int GetCountOfNeededNpcs(IEnumerable<Player> players);
+        IEnumerable<NpcPlayer> GetDefaultCountOfNpcs();
+        IEnumerable<NpcPlayer> GenerateNpcs(int count);
+        int GetCountOfNeededNpcs(IEnumerable<PlayerBase> players);
     }
 }

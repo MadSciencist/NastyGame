@@ -10,10 +10,11 @@ namespace Api.Hub.Domain.Services
         void AddPlayer(string connectionId, bool isAuthenticated);
         void SetName(string connectionId, string name);
         void RemovePlayer(string connectionId);
-        IList<Player> GetPlayers();
+        IList<PlayerBase> GetPlayers();
         int GetCount();
         void Update(string connectionId, BubbleDto bubbleDto);
-        void KillPlayer(Player player);
-        event EventHandler<string> PlayerRemoved;
+        void KillPlayer(PlayerBase player);
+        void UpdateStats(PlayerBase killer, PlayerBase victim);
+        event EventHandler<Player> PlayerRemoved;
     }
 }

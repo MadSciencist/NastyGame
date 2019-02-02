@@ -1,6 +1,5 @@
-﻿using System;
-using Api.Hub.Domain.DTOs;
-using Api.Hub.Domain.GameConfig;
+﻿using Api.Hub.Domain.DTOs;
+using System;
 
 namespace Api.Hub.Domain.GameDomain
 {
@@ -21,9 +20,7 @@ namespace Api.Hub.Domain.GameDomain
             Radius = bubble.Radius;
         }
 
-        public Bubble()
-        {
-        }
+        public Bubble() { }
 
         public double GetDistance(Bubble other)
         {
