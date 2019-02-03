@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Api.Identity.Controllers
 {
@@ -30,9 +31,9 @@ namespace Api.Identity.Controllers
         [AllowAnonymous]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var user = _userRepository.GetUserByLogin(loginDto.Login);
+            var user = await _userRepository.GetUserByLogin(loginDto.Login);
 
             if (user == null)
             {
@@ -55,9 +56,9 @@ namespace Api.Identity.Controllers
         [AllowAnonymous]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public IActionResult Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            var user = _userRepository.GetUserByLogin(registerDto.Login);
+            var user = await _userRepository.GetUserByLogin(registerDto.Login);
 
             if (user != null)
             {
@@ -65,7 +66,7 @@ namespace Api.Identity.Controllers
                 return BadRequest(new { Errors = new { title = "User with this login already exists" } });
             }
 
-            var createdUser = _userRepository.CreateUser(registerDto);
+            var createdUser = await _userRepository.CreateUser(registerDto);
 
             if (createdUser == null)
             {

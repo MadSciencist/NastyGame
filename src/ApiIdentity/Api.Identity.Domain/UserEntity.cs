@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Api.Identity.Domain
 {
@@ -15,5 +16,6 @@ namespace Api.Identity.Domain
         public string LastName { get; set; }
         public DateTime? BirthDate { get; set; }
         public DateTime? JoinDate { get; set; }
+        public IList<AddressEntity> Addresses { get; set; }
     }
 }
