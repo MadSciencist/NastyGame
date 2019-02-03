@@ -1,20 +1,19 @@
 ﻿using Api.Common.Infrastructure;
+using Api.Hub.Domain.GameDomain;
 using Api.Hub.Domain.Services;
 using Api.Hub.Hubs;
+using Api.Hub.Infrastructure;
 using Api.Hub.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text;
-using System.Threading.Tasks;
-using Api.Hub.Domain.GameDomain;
 
 namespace Api.Hub
 {
@@ -50,7 +49,6 @@ namespace Api.Hub
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -62,38 +60,17 @@ namespace Api.Hub
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
                         ClockSkew = TimeSpan.FromMinutes(0),
                     };
-
-                    options.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = OnMessageReceived
-                    };
                 });
 
             services.AddHealthChecks().AddCheck<HealthCheck>("default");
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddSignalR(settings => { settings.EnableDetailedErrors = true; }).AddMessagePackProtocol();
 
-            services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.AddScoped<IHubTokenHandler, HubTokenHandler>();
             services.AddSingleton<IPlayersService, PlayersService>();
             services.AddSingleton<INotifierTask, PlayerNotifierTask>();
             services.AddTransient<INpcService, NpcService>();
             services.AddSingleton<IGameplay, Gameplay>();
-        }
-
-        private Task OnMessageReceived(MessageReceivedContext context)
-        {
-            var accessToken = context.Request.Query["access_token"];
-            //var accessToken = context.Request.Headers["Authorization"].ToString().Split(" ")[1];
-
-            // If the request is for our hub...
-            var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/game/socket")))
-            {
-                // Read the token out of the query string
-                context.Token = accessToken;
-            }
-
-            return Task.CompletedTask;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

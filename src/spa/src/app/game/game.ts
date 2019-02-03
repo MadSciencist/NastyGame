@@ -35,7 +35,7 @@ export class Game {
     let token = this.reduxStore.store.user.token;
 
     nickname = "test";
-    useAuthentication = true;
+    useAuthentication = false;
     token =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyOTg0NDZjMC00MDIyLTRkYTAtYTZiYi1iYmRmOGUyYmJjNzUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW5OYW1lIiwiZW1haWwiOiJBZG1pbkVtYWlsIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiI2IiwiZXhwIjoxNTQ5MjQ4MDQ5LCJpc3MiOiJOYXN0eUdhbWUiLCJhdWQiOiIqIn0.YVxC-zD-n81l2u0fpMf2AFtXtjHYXr0VzxSE_Rzrq5M";
 

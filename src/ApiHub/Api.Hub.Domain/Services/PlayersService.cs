@@ -4,7 +4,6 @@ using Api.Hub.Domain.GameDomain;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Api.Hub.Domain.Services
@@ -28,7 +27,7 @@ namespace Api.Hub.Domain.Services
         public int GetCount() => _players.Count;
         public IList<PlayerBase> GetPlayers() => _players;
 
-        public void AddPlayer(string connectionId, bool isAuthenticated)
+        public void AddPlayer(string connectionId, bool isAuthenticated, int globalId, string globalName)
         {
             var player = _players.FirstOrDefault(p => p.ConnectionId == connectionId);
 
@@ -43,9 +42,11 @@ namespace Api.Hub.Domain.Services
             _players.Add(new Player
             {
                 ConnectionId = connectionId,
+                IsAuthenticated = isAuthenticated,
+                GlobalId = globalId,
+                GlobalName = globalName,
                 IsNpc = false,
                 Bubble = defaultBubble,
-                IsAuthenticated = isAuthenticated,
                 JoinedTime = DateTime.UtcNow,
                 Score = 0,
                 Victims = new List<string>()
@@ -63,8 +64,11 @@ namespace Api.Hub.Domain.Services
                 {
                     murderer.Victims.Add(vict.Name);
                     vict.KilledBy = murderer.Name;
+
+                    // TODO create new event and update stats service here (if user isAuth)
                 }
 
+                // TODO Use this event to update Stats service (if user isAuth)
                 PlayerScored?.Invoke(this, murderer);
             }
         }
@@ -73,7 +77,7 @@ namespace Api.Hub.Domain.Services
         {
             if (player is Player victim)
             {
-                PlayerRemoved?.Invoke(this, victim);
+                PlayerRemoved?.Invoke(this, victim); // TODO Use this event to update Stats service (if user isAuth) [check if its not redundant with above]
             }             
 
             _players.Remove(player);

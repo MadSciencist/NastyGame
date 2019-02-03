@@ -6,6 +6,8 @@ namespace Api.Hub.Domain.GameDomain
     public class Player : PlayerBase
     {
         public bool IsAuthenticated { get; set; }
+        public int GlobalId { get; set; }
+        public string GlobalName { get; set; }
         public int Score { get; set; }
         public IList<string> Victims { get; set; }
         public string KilledBy { get; set; }

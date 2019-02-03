@@ -11,7 +11,7 @@ namespace Api.Hub
 {
     public class SemiAnon : AuthorizeAttribute, IAuthorizationFilter
     {
-        public SemiAnon() : base(JwtBearerDefaults.AuthenticationScheme)
+        public SemiAnon()
         {
             
         }

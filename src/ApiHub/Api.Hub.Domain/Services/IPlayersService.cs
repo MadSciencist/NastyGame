@@ -7,7 +7,7 @@ namespace Api.Hub.Domain.Services
 {
     public interface IPlayersService
     {
-        void AddPlayer(string connectionId, bool isAuthenticated);
+        void AddPlayer(string connectionId, bool isAuthenticated, int globalId, string globalName);
         void SetName(string connectionId, string name);
         void RemovePlayer(string connectionId);
         IList<PlayerBase> GetPlayers();

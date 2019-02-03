@@ -1,24 +1,23 @@
 ﻿using Api.Hub.Domain.DTOs;
 using Api.Hub.Domain.Services;
+using Api.Hub.Infrastructure;
 using Api.Hub.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Hub.Hubs
 {
-    // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[SemiAnon]
     public class GameHub : Microsoft.AspNetCore.SignalR.Hub
     {
+        private readonly IHubTokenHandler _tokenHandler;
         private readonly IPlayersService _playersService;
         private readonly INotifierTask _playersNotifier;
         private readonly ILogger<GameHub> _logger;
 
-        public GameHub(IPlayersService players, INotifierTask playersNotifier, ILogger<GameHub> logger)
+        public GameHub(IHubTokenHandler tokenHandler, IPlayersService players, INotifierTask playersNotifier, ILogger<GameHub> logger)
         {
+            _tokenHandler = tokenHandler;
             _playersService = players;
             _playersNotifier = playersNotifier;
             _logger = logger;
@@ -26,10 +25,11 @@ namespace Api.Hub.Hubs
 
         public override Task OnConnectedAsync()
         {
-            var isAuthenticated = Context.UserIdentifier != null;
+            var (isAuth, id, name) = _tokenHandler.GetClaimValues(Context);
+
             var connectionid = Context.ConnectionId;
-            _playersService.AddPlayer(connectionid, isAuthenticated);
-            _logger.LogInformation($"New connection: {connectionid} isAuth: {isAuthenticated}");
+            _playersService.AddPlayer(connectionid, isAuth, id, name);
+            _logger.LogInformation($"New connection: {connectionid} isAuth: {isAuth}");
 
             return base.OnConnectedAsync();
         }
@@ -52,7 +52,7 @@ namespace Api.Hub.Hubs
         }
 
         public void Update(BubbleDto bubble) => _playersService.Update(Context.ConnectionId, bubble);
-        
+
         private void StartCyclicTasks()
         {
             _logger.LogInformation($"Starting cyclic tasks");
@@ -60,9 +60,7 @@ namespace Api.Hub.Hubs
             if (_playersService.GetCount() > 0)
             {
                 if (_playersNotifier.State == NotifierState.Stopped)
-                {
                     _playersNotifier.Start();
-                }
             }
         }
 
@@ -73,9 +71,7 @@ namespace Api.Hub.Hubs
             if (_playersService.GetCount() == 0)
             {
                 if (_playersNotifier.State == NotifierState.Started)
-                {
                     _playersNotifier.Stop();
-                }
             }
         }
     }
