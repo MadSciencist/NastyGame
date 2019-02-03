@@ -1,5 +1,6 @@
 export interface UserModel {
   id: number;
+  isAuth: boolean;
   login: string;
   name: string;
   lastName: string;

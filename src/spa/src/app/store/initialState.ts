@@ -2,10 +2,11 @@ import IStore from "./IStore";
 
 export const initialState: IStore = {
   user: {
-    birthDate: new Date(),
+    birthDate: null,
+    isAuth: false,
     email: "",
     id: 0,
-    joinDate: new Date(),
+    joinDate: null,
     lastName: "",
     login: "",
     name: "",

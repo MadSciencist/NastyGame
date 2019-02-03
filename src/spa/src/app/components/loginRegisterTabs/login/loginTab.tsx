@@ -11,7 +11,7 @@ import { bindActionCreators, Dispatch } from "redux";
 import IStore from "../../../store/IStore";
 import * as Actions from "../../../actions/Actions";
 import { IAppProps } from "../../../models/IAppProps";
-import Const from "app/utils/Constants";
+import Const from "../../../utils/Constants";
 import ApiService from "app/services/ApiService";
 import { push } from "react-router-redux";
 import { RouteComponentProps } from "react-router-dom";
@@ -66,7 +66,8 @@ class LoginTab extends React.Component<ComponentProps, LoginTabState> {
           lastName: resp.user.lastName,
           login: resp.user.login,
           name: resp.user.name,
-          token: resp.token
+          token: resp.token,
+          isAuth: true
         };
 
         this.setState({ isAuthSuccess: true }); // update component state

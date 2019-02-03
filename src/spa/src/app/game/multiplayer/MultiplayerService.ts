@@ -10,20 +10,33 @@ import PlayerDto from "./PlayerDto";
 
 export default class MultiplayerService {
   private conn: SignalR.HubConnection;
-  // private token: string;
+  private nickname: string;
+  private token: string = "";
+  private useAuthentication: boolean;
   private enemiesUpdated: (dto: Array<EnemyBubbleDto>) => void;
   private connectionStarted: (dto: GameConfig) => void;
-  // private lostGame: () => void;
+  private lostGame: () => void;
 
-  constructor() {
-    // this.token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI1Y2MxNTU3Ni01OGNmLTQ5OTYtOTY2YS1kMTg0MmIxMTA1ZTQiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiTWF0dGUiLCJlbWFpbCI6ImFzZEAuYXMiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEyIiwiZXhwIjoxNTQ4OTk4MTExLCJpc3MiOiJOYXN0eUdhbWUiLCJhdWQiOiIqIn0.1cv1fy2Rs3GNlWUEuAfQi01FqKcE--qC1g1KMmxVPsY";
-    this.conn = new SignalR.HubConnectionBuilder()
-      // .withUrl(Constants.HubEndpoint, { accessTokenFactory: () => this.token })
-      .withUrl(Constants.HubEndpoint, {})
-      .withHubProtocol(new MsgPack.MessagePackHubProtocol())
-      .configureLogging(SignalR.LogLevel.Information)
-      .build();
+  constructor(nickname: string, useAuthentication: boolean, token?: string) {
+    this.nickname = nickname;
+    this.useAuthentication = useAuthentication;
+    this.token = token;
+  }
+
+  public startConnection() {
+    if (this.useAuthentication) {
+      this.conn = new SignalR.HubConnectionBuilder()
+        .withUrl(Constants.HubEndpoint, { accessTokenFactory: () => this.token })
+        .withHubProtocol(new MsgPack.MessagePackHubProtocol())
+        .configureLogging(SignalR.LogLevel.Information)
+        .build();
+    } else {
+      this.conn = new SignalR.HubConnectionBuilder()
+        .withUrl(Constants.HubEndpoint, {})
+        .withHubProtocol(new MsgPack.MessagePackHubProtocol())
+        .configureLogging(SignalR.LogLevel.Information)
+        .build();
+    }
 
     this.conn
       .start()
@@ -37,7 +50,7 @@ export default class MultiplayerService {
     this.conn.on("Lost", (lostDto: PlayerDto) => {
       console.log(lostDto);
       this.conn.stop();
-      // this.lostGame();
+      this.lostGame();
     });
 
     this.conn.on("Scored", (scoredDto: PlayerDto) => {
@@ -63,12 +76,11 @@ export default class MultiplayerService {
   }
 
   public async onLost(callback: () => void) {
-    // this.lostGame = callback;
+    this.lostGame = callback;
   }
 
   private async onConnected() {
-    const myName = (<HTMLInputElement>document.getElementById("nick-input")).value as string;
-    const configDto: GameConfigDto = await this.registerNickname(myName);
+    const configDto: GameConfigDto = await this.registerNickname(this.nickname);
     this.connectionStarted(new GameConfig(configDto));
   }
 

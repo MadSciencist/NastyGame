@@ -9,8 +9,10 @@ import GameConfig from "./GameConfig";
 import OpponentBubble from "./models/OpponentBubble";
 import PlayerBubble from "./models/PlayerBubble";
 import BubbleBase from "./models/BubbleBase";
+import { IAppProps } from "app/models/IAppProps";
 
 export class Game {
+  private reduxStore: IAppProps;
   private multiplayer: MultiplayerService;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D | null;
@@ -21,11 +23,28 @@ export class Game {
   private prevPos: IVector;
   private gameConfig: GameConfig;
 
-  constructor() {
+  constructor(reduxStore: IAppProps) {
+    this.reduxStore = reduxStore;
     this.canvas = <HTMLCanvasElement>document.getElementById("gameCanvas");
     this.ctx = this.canvas.getContext("2d");
+  }
 
-    this.multiplayer = new MultiplayerService();
+  public startNew() {
+    let nickname = this.reduxStore.store.player.nickname;
+    let useAuthentication = this.reduxStore.store.user.isAuth;
+    let token = this.reduxStore.store.user.token;
+
+    nickname = "test";
+    useAuthentication = true;
+    token =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyOTg0NDZjMC00MDIyLTRkYTAtYTZiYi1iYmRmOGUyYmJjNzUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiQWRtaW5OYW1lIiwiZW1haWwiOiJBZG1pbkVtYWlsIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZWlkZW50aWZpZXIiOiI2IiwiZXhwIjoxNTQ5MjQ4MDQ5LCJpc3MiOiJOYXN0eUdhbWUiLCJhdWQiOiIqIn0.YVxC-zD-n81l2u0fpMf2AFtXtjHYXr0VzxSE_Rzrq5M";
+
+    if (nickname === "") {
+      location.href = "/";
+    }
+
+    this.multiplayer = new MultiplayerService(nickname, useAuthentication, token);
+    this.multiplayer.startConnection();
     this.multiplayer.onStarted((cfg: GameConfig) => {
       this.gameConfig = cfg;
 
@@ -37,6 +56,7 @@ export class Game {
       this.prevPos = Vector.CreateVector(initalPos);
       this.bubble = new PlayerBubble(this.ctx!, initalPos, this.gameConfig);
 
+      console.warn(this.reduxStore);
       setInterval(this.loop.bind(this), 25);
     });
 
