@@ -8,7 +8,11 @@ import LoginRegisterTabs, {
 
 export const App = hot(module)(() => (
   <Switch>
-    <Route path="/play" component={GameCanvas} />
+    <Route
+      path="/play"
+      render={(props) => <LoginRegisterTabs {...props} activeCard={LoginRegisterTabsRole.Play} />}
+    />
+
     <Route
       path="/login"
       render={(props) => <LoginRegisterTabs {...props} activeCard={LoginRegisterTabsRole.Login} />}
@@ -19,6 +23,9 @@ export const App = hot(module)(() => (
         <LoginRegisterTabs {...props} activeCard={LoginRegisterTabsRole.Register} />
       )}
     />
+
+    <Route path="/game" component={GameCanvas} />
+
     <Route
       path="/"
       render={(props) => <LoginRegisterTabs {...props} activeCard={LoginRegisterTabsRole.Play} />}

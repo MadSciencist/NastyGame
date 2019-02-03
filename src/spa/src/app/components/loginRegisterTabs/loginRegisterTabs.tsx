@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withRouter, RouteComponentProps } from "react-router-dom";
+import { RouteComponentProps } from "react-router-dom";
 
 import Paper from "@material-ui/core/Paper";
 import Tabs from "@material-ui/core/Tabs";
@@ -36,6 +36,10 @@ class LoginRegisterTabs extends React.Component<
     this.state = { activeCard: this.props.activeCard || 0 };
   }
 
+  componentWillReceiveProps(props: ILoginRegisterTabsProps) {
+    this.setState({ activeCard: props.activeCard });
+  }
+
   handleChange = (event: any, value: any) => {
     if (value === LoginRegisterTabsRole.Play) {
       this.props.history.push("/");
@@ -66,8 +70,8 @@ class LoginRegisterTabs extends React.Component<
             <Tab label="Register" />
           </Tabs>
           <Divider light />
-          {activeCard === LoginRegisterTabsRole.Play && <PlayAnon />}
-          {activeCard === LoginRegisterTabsRole.Login && <LoginTab />}
+          {activeCard === LoginRegisterTabsRole.Play && <PlayAnon {...this.props} />}
+          {activeCard === LoginRegisterTabsRole.Login && <LoginTab {...this.props} />}
           {activeCard === LoginRegisterTabsRole.Register && <RegisterTab />}
         </Paper>
       </div>
@@ -75,4 +79,4 @@ class LoginRegisterTabs extends React.Component<
   }
 }
 
-export default withRouter(LoginRegisterTabs);
+export default LoginRegisterTabs;

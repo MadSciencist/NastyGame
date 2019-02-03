@@ -1,9 +1,10 @@
 import { combineReducers } from "redux";
 import IStore from "../store/IStore";
-import { userReducer } from "./userReducer";
+import { UserReducer, PlayerReducer } from "./userReducer";
 
 const rootReducer = combineReducers<IStore>({
-  user: userReducer
+  user: UserReducer,
+  player: PlayerReducer
 });
 
 export default rootReducer;

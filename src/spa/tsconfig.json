@@ -11,6 +11,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "strict": true,
+    "strictNullChecks": false,
     "outDir": "build",
     "strictPropertyInitialization": false,
     "strictFunctionTypes": false,

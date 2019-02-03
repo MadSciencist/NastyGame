@@ -9,6 +9,9 @@ export const initialState: IStore = {
     lastName: "",
     login: "",
     name: "",
+    token: ""
+  },
+  player: {
     nickname: ""
   }
 };

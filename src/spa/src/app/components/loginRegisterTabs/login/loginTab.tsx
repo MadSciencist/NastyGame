@@ -10,16 +10,17 @@ import { connect } from "react-redux";
 import { bindActionCreators, Dispatch } from "redux";
 import IStore from "../../../store/IStore";
 import * as Actions from "../../../actions/Actions";
-import * as IActions from "../../../actions/IActions";
 import { IAppProps } from "../../../models/IAppProps";
 import Const from "app/utils/Constants";
 import ApiService from "app/services/ApiService";
-import { withRouter, RouteComponentProps } from "react-router-dom";
+import { push } from "react-router-redux";
+import { RouteComponentProps } from "react-router-dom";
 
 interface OwnProps {}
 
 interface DispatchProps {
-  onUserFetched?: (user: UserModel) => IActions.IGetUserActionSuccess;
+  onUserFetched?: (user: UserModel) => Actions.IGetUserActionSuccess;
+  onChangePath?: (key: string) => void;
 }
 
 type ComponentProps = OwnProps & IAppProps & DispatchProps & RouteComponentProps<{}>;
@@ -65,13 +66,12 @@ class LoginTab extends React.Component<ComponentProps, LoginTabState> {
           lastName: resp.user.lastName,
           login: resp.user.login,
           name: resp.user.name,
-          nickname: resp.user.name // no nickname yet
+          token: resp.token
         };
-
-        this.props.history.push("/");
 
         this.setState({ isAuthSuccess: true }); // update component state
         this.props.onUserFetched!(user); // update redux store
+        this.props.onChangePath("/play");
       })
       .catch(() => {
         this.setState({ isAuthSuccess: false });
@@ -155,13 +155,14 @@ function mapStateToProps(store: IStore): IAppProps {
 
 function mapDispatchToProps(dispatch: Dispatch<IStore>): DispatchProps {
   return {
-    onUserFetched: bindActionCreators(Actions.getCurrentUserSuccess, dispatch)
+    onUserFetched: bindActionCreators(Actions.getCurrentUserSuccess, dispatch),
+    onChangePath: (key: string) => {
+      dispatch(push(key));
+    }
   };
 }
 
-export default withRouter(
-  connect<IAppProps, DispatchProps, OwnProps>(
-    mapStateToProps,
-    mapDispatchToProps
-  )(LoginTab)
-);
+export default connect<IAppProps, DispatchProps, OwnProps>(
+  mapStateToProps,
+  mapDispatchToProps
+)(LoginTab);
