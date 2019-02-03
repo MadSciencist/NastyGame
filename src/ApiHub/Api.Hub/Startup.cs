@@ -4,16 +4,12 @@ using Api.Hub.Domain.Services;
 using Api.Hub.Hubs;
 using Api.Hub.Infrastructure;
 using Api.Hub.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Text;
 
 namespace Api.Hub
 {
@@ -29,38 +25,10 @@ namespace Api.Hub
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(settings =>
-            {
-                settings.AddPolicy("CorsPolicy", builder =>
-                {
-                    builder.WithOrigins("http://localhost:3000")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
-                });
-            });
+            services.AddDefaultCorsPolicy();
 
+            services.AddJwthAuthentication(Configuration);
             services.AddAuthorization();
-
-            var jwtKey = Configuration["AuthenticationJwt:Key"];
-            var jwtIssuer = Configuration["AuthenticationJwt:Issuer"];
-            var jwtAudience = Configuration["AuthenticationJwt:Audience"];
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtIssuer,
-                        ValidAudience = jwtAudience,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-                        ClockSkew = TimeSpan.FromMinutes(0),
-                    };
-                });
 
             services.AddHealthChecks().AddCheck<HealthCheck>("default");
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);

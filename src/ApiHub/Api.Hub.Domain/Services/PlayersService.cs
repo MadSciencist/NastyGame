@@ -55,6 +55,7 @@ namespace Api.Hub.Domain.Services
             _logger.LogInformation($"Added player: {connectionId}, isAuth: {isAuthenticated}.");
         }
 
+        // TODO debug  this, if one player kills another it gets executed twice in some cases
         public void UpdateStats(PlayerBase killer, PlayerBase victim)
         {
             if (killer is Player murderer)

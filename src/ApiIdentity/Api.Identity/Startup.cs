@@ -25,16 +25,7 @@ namespace Api.Identity
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(settings =>
-            {
-                settings.AddPolicy("CorsPolicy", builder =>
-                {
-                    builder.WithOrigins("http://localhost:3000")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials();
-                });
-            });
+            services.AddDefaultCorsPolicy();
 
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ITokenBuilder, TokenBuilder>();
@@ -48,27 +39,9 @@ namespace Api.Identity
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API docs" });
             });
 
-            AddJwtAuthentication(services);
-            services.AddAuthorization();
-        }
+            services.AddJwthAuthentication(Configuration);
 
-        private void AddJwtAuthentication(IServiceCollection services)
-        {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["AuthenticationJwt:Issuer"],
-                        ValidAudience = Configuration["AuthenticationJwt:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AuthenticationJwt:Key"])),
-                        ClockSkew = TimeSpan.FromMinutes(0)
-                    };
-                });
+            services.AddAuthorization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
