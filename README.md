@@ -15,12 +15,13 @@ Repository for an fun project, which is agar.io type game. The main goal of this
  - API docs (swagger)
 
 ### Road Map:
-- [x] Create MSQL DB
+- [x] Create MSSQL DB
 - [x] Create JWT provider
-- [x] Create users API (login, register)
+- [x] Create users API (login, register) using MSSQL + Dapper - consider moving it to Identity + Entity Framework
 - [x] Create React+Redux+TypeScript SPA template
 - [ ] **[In progress]** Create simple game (more like PoC then actuall game)
 - [ ] **[In progress]** Create SignalR hub for managing multiplayer mode
 - [ ] **[In progress]** Authorize SignalR
+- [ ] **[In progress]** Crete Statistics service with persistence layer using Dapper
 - [ ] Create RabbitMQ messaging for notyfying Identity service about user stats
 - [ ] Move into docker containers
