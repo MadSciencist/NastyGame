@@ -45,7 +45,9 @@ namespace Api.Identity.Controllers
             {
                 var token = _tokenBuilder.BuildToken(user);
                 _logger.LogInformation($"Created token for user: {loginDto.Login}");
-                return Ok(new { user = new UserDto(user), token });
+
+                var access = new {token.token, expires = token.expring};
+                return Ok(new { user = new UserDto(user), access });
             }
 
             _logger.LogInformation($"Unauthorized: {loginDto.Login}");

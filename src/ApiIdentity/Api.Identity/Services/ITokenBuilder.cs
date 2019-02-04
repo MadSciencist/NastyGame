@@ -1,9 +1,10 @@
-﻿using Api.Identity.Domain;
+﻿using System;
+using Api.Identity.Domain;
 
 namespace Api.Identity.Services
 {
     public interface ITokenBuilder
     {
-        string BuildToken(UserEntity user);
+        (string token, DateTime expring) BuildToken(UserEntity user);
     }
 }

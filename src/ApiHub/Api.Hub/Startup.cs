@@ -1,15 +1,21 @@
 ﻿using Api.Common.Infrastructure;
+using Api.Common.Messaging.Abstractions;
+using Api.Common.Messaging.RabbitMQ;
 using Api.Hub.Domain.GameDomain;
 using Api.Hub.Domain.Services;
 using Api.Hub.Hubs;
 using Api.Hub.Infrastructure;
 using Api.Hub.Services;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
+using System;
 
 namespace Api.Hub
 {
@@ -23,7 +29,7 @@ namespace Api.Hub
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddDefaultCorsPolicy();
 
@@ -39,6 +45,23 @@ namespace Api.Hub
             services.AddSingleton<INotifierTask, PlayerNotifierTask>();
             services.AddTransient<INpcService, NpcService>();
             services.AddSingleton<IGameplay, Gameplay>();
+
+            services.AddSingleton<IEventBus, RabbitMQEventBus>(provider =>
+            {
+                var conn = provider.GetRequiredService<IRabbitMQConnection>();
+                var logger = provider.GetRequiredService<ILogger<RabbitMQEventBus>>();
+                var scope = provider.GetRequiredService<ILifetimeScope>();
+                var subsManager = provider.GetRequiredService<IEventBusSubscriptionManager>();
+
+                return new RabbitMQEventBus(conn, logger, scope, subsManager);
+            });
+
+            services.AddSingleton<IEventBusSubscriptionManager, EventBusSubscriptionManager>();
+
+            var autofacContainer = new ContainerBuilder();
+            autofacContainer.Populate(services);
+
+            return new AutofacServiceProvider(autofacContainer.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

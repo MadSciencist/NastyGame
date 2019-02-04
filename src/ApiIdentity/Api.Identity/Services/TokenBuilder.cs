@@ -18,28 +18,26 @@ namespace Api.Identity.Services
             _config = config;
         }
 
-        public string BuildToken(UserEntity user)
+        public (string token, DateTime expring) BuildToken(UserEntity user)
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["AuthenticationJwt:Key"]));
-
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.Now.AddMinutes(double.Parse(_config["AuthenticationJwt:ValidTimeMinutes"]));
 
             var token = new JwtSecurityToken(
                 _config["AuthenticationJwt:Issuer"],
                 _config["AuthenticationJwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(double.Parse(_config["AuthenticationJwt:ValidTimeMinutes"])),
-                signingCredentials: credentials);
+                expires,
+                signingCredentials: signingCredentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return (new JwtSecurityTokenHandler().WriteToken(token), expires);
         }
     }
 }

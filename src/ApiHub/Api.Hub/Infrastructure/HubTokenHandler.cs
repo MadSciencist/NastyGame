@@ -49,7 +49,7 @@ namespace Api.Hub.Infrastructure
             var decodedToken = new JwtSecurityTokenHandler().ValidateToken(rawToken, validationParams, out var token);
 
             var name = decodedToken?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
-            var nameIdentifier = decodedToken?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            var nameIdentifier = decodedToken?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
 
             if (int.TryParse(nameIdentifier, out var id))
             {
