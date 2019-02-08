@@ -1,14 +1,14 @@
-﻿using Api.Hub.Domain.Services;
+﻿using Api.Common.Messaging.Abstractions;
+using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.GameDomain;
+using Api.Hub.Domain.Services;
+using Api.Hub.Events;
 using Api.Hub.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading;
-using Api.Common.Messaging.Abstractions;
-using Api.Hub.Domain.DTOs;
-using Api.Hub.Domain.GameDomain;
-using Api.Hub.Events;
 
 namespace Api.Hub.Services
 {
@@ -27,8 +27,15 @@ namespace Api.Hub.Services
             _gameplay = gameplay;
             _playersService = players;
             _logger = logger;
+            _playersService.PlayerJoined += PlayersServiceOnPlayerJoined;
             _playersService.PlayerRemoved += PlayersServiceOnPlayerRemoved;
             _playersService.PlayerScored += PlayersServiceOnPlayerScored;
+        }
+
+        private void PlayersServiceOnPlayerJoined(object sender, Player e)
+        {
+            var @event = new PlayerStartedNewGameEvent(e.GlobalId, e.JoinedTime);
+            _eventBus.Publish(@event);
         }
 
         private async void PlayersServiceOnPlayerScored(object sender, Player player)
@@ -36,7 +43,7 @@ namespace Api.Hub.Services
             // publish message to RabbitMQ
             if (player.IsAuthenticated)
             {
-                var @event = new UpdateUserKillsEvent(player.GlobalId, player.Victims.LastOrDefault());
+                var @event = new UpdateUserKillsEvent(player.GlobalId, player.Victims.LastOrDefault() ?? "NPC");
                 _eventBus.Publish(@event);
             }
 

@@ -15,6 +15,7 @@ namespace Api.Hub.Domain.Services
         void Update(string connectionId, BubbleDto bubbleDto);
         void KillPlayer(PlayerBase player);
         void UpdateStats(PlayerBase killer, PlayerBase victim);
+        event EventHandler<Player> PlayerJoined;
         event EventHandler<Player> PlayerRemoved;
         event EventHandler<Player> PlayerScored;
     }

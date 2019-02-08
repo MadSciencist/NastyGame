@@ -7,6 +7,7 @@ namespace Api.Hub.Events
     {
         public int UserId { get; set; }
         public DateTime JoineDate { get; set; }
+
         public PlayerStartedNewGameEvent(int userId, DateTime joineDate)
         {
             UserId = userId;

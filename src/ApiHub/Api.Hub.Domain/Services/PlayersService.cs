@@ -10,6 +10,7 @@ namespace Api.Hub.Domain.Services
 {
     public class PlayersService : IPlayersService
     {
+        public event EventHandler<Player> PlayerJoined;
         public event EventHandler<Player> PlayerRemoved;
         public event EventHandler<Player> PlayerScored;
         private readonly INpcService _npcService;
@@ -39,7 +40,7 @@ namespace Api.Hub.Domain.Services
 
             var defaultBubble = new Bubble { Position = new Point2D((double)CanvasConfig.WorldWidth / 2, (double)CanvasConfig.WorldHeight / 2), Radius = BubbleConfig.InitialPlayerRadius };
 
-            _players.Add(new Player
+            var newPlayer = new Player
             {
                 ConnectionId = connectionId,
                 IsAuthenticated = isAuthenticated,
@@ -50,7 +51,11 @@ namespace Api.Hub.Domain.Services
                 JoinedTime = DateTime.UtcNow,
                 Score = 0,
                 Victims = new List<string>()
-            });
+            };
+
+            _players.Add(newPlayer);
+
+            PlayerJoined?.Invoke(this, newPlayer);
 
             _logger.LogInformation($"Added player: {connectionId}, isAuth: {isAuthenticated}.");
         }
@@ -65,11 +70,8 @@ namespace Api.Hub.Domain.Services
                 {
                     murderer.Victims.Add(vict.Name);
                     vict.KilledBy = murderer.Name;
-
-                    // TODO create new event and update stats service here (if user isAuth)
                 }
 
-                // TODO Use this event to update Stats service (if user isAuth)
                 PlayerScored?.Invoke(this, murderer);
             }
         }
@@ -78,7 +80,7 @@ namespace Api.Hub.Domain.Services
         {
             if (player is Player victim)
             {
-                PlayerRemoved?.Invoke(this, victim); // TODO Use this event to update Stats service (if user isAuth) [check if its not redundant with above]
+                PlayerRemoved?.Invoke(this, victim);
             }             
 
             _players.Remove(player);
