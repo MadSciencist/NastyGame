@@ -66,7 +66,7 @@ class LoginTab extends React.Component<ComponentProps, LoginTabState> {
           lastName: resp.user.lastName,
           login: resp.user.login,
           name: resp.user.name,
-          token: resp.token,
+          token: resp.access.token,
           isAuth: true
         };
 

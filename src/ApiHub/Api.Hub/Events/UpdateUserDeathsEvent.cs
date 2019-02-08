@@ -10,10 +10,10 @@ namespace Api.Hub.Events
         public TimeSpan GameTime { get; set; }
 
 
-        public UpdateUserDeathsEvent(string killedBy, int userId, TimeSpan gameTime)
+        public UpdateUserDeathsEvent(int userId, string killedBy, TimeSpan gameTime)
         {
-            KilledBy = killedBy;
             UserId = userId;
+            KilledBy = killedBy;
             GameTime = gameTime;
         }
     }

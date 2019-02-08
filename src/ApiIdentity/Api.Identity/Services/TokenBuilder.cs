@@ -34,7 +34,7 @@ namespace Api.Identity.Services
                 _config["AuthenticationJwt:Issuer"],
                 _config["AuthenticationJwt:Audience"],
                 claims,
-                expires,
+                expires: expires,
                 signingCredentials: signingCredentials);
 
             return (new JwtSecurityTokenHandler().WriteToken(token), expires);
