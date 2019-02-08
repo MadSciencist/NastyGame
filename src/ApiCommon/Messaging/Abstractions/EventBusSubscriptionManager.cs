@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Api.Common.Messaging.Abstractions
 {
@@ -49,14 +48,7 @@ namespace Api.Common.Messaging.Abstractions
                     $"Handler Type {handlerType.Name} already registered for '{eventName}'", nameof(handlerType));
             }
 
-            if (isDynamic)
-            {
-                _handlers[eventName].Add(SubscriptionInfo.Dynamic(handlerType));
-            }
-            else
-            {
                 _handlers[eventName].Add(SubscriptionInfo.Typed(handlerType));
-            }
         }
 
         public void RemoveSubscription<T, TH>()
@@ -82,7 +74,8 @@ namespace Api.Common.Messaging.Abstractions
                     {
                         _eventTypes.Remove(eventType);
                     }
-                    RaiseOnEventRemoved(eventName);
+
+                    OnEventRemoved?.Invoke(this, eventName);
                 }
 
             }
@@ -93,17 +86,8 @@ namespace Api.Common.Messaging.Abstractions
             var key = GetEventKey<T>();
             return GetHandlersForEvent(key);
         }
+
         public IEnumerable<SubscriptionInfo> GetHandlersForEvent(string eventName) => _handlers[eventName];
-
-        private void RaiseOnEventRemoved(string eventName)
-        {
-            var handler = OnEventRemoved;
-            if (handler != null)
-            {
-                OnEventRemoved(this, eventName);
-            }
-        }
-
 
         private SubscriptionInfo FindSubscriptionToRemove<T, TH>()
              where T : IntegrationEvent

@@ -1,33 +1,32 @@
 ﻿using Api.Common.Messaging.Abstractions;
+using Autofac;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Autofac;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using RabbitMQ.Client.Events;
 
 namespace Api.Common.Messaging.RabbitMQ
 {
-    public class RabbitMQEventBus : IEventBus, IDisposable
+    public class RabbitMqEventBus : IEventBus, IDisposable
     {
-        const string BrokerName = "MainEventBus";
+        private const string BrokerName = "MainEventBus";
         private readonly IEventBusSubscriptionManager _subsManager;
-        private readonly ILogger<RabbitMQEventBus> _logger;
+        private readonly ILogger<RabbitMqEventBus> _logger;
         private readonly ILifetimeScope _autofac;
         private IModel _consumerChannel;
         private readonly IRabbitMQConnection _persistentConnection;
-        private string _queueName;
+        private readonly string _queueName;
 
-        public RabbitMQEventBus(IRabbitMQConnection persistentConnection, ILogger<RabbitMQEventBus> logger,
-            ILifetimeScope autofac, IEventBusSubscriptionManager subsManager, string queueName = null)
+        public RabbitMqEventBus(IRabbitMQConnection persistentConnection, ILogger<RabbitMqEventBus> logger,
+            ILifetimeScope autofac, IEventBusSubscriptionManager subsManager, string queueName)
         {
+            _queueName = queueName ?? throw new ArgumentNullException(nameof(queueName));
             _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _subsManager = subsManager ?? new EventBusSubscriptionManager();
-            _queueName = queueName;
             _consumerChannel = CreateConsumerChannel();
             _autofac = autofac;
         }
@@ -89,12 +88,11 @@ namespace Api.Common.Messaging.RabbitMQ
         public void Publish(IntegrationEvent @event)
         {
             var eventName = @event.GetType().Name;
-            var factory = new ConnectionFactory() { HostName = "" };
+            var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "admin", Password = "admin", VirtualHost = "/" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
-                channel.ExchangeDeclare(exchange: BrokerName,
-                    type: "direct");
+                channel.ExchangeDeclare(exchange: BrokerName, type: "direct" );
                 var message = JsonConvert.SerializeObject(@event);
                 var body = Encoding.UTF8.GetBytes(message);
                 channel.BasicPublish(exchange: BrokerName,
@@ -126,7 +124,7 @@ namespace Api.Common.Messaging.RabbitMQ
 
         public void Unsubscribe<T, TH>() where T : IntegrationEvent where TH : IIntegrationEventHandler<T>
         {
-            throw new NotImplementedException();
+            _subsManager.RemoveSubscription<T, TH>();
         }
 
         public void Dispose()

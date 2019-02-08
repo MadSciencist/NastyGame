@@ -1,10 +1,19 @@
-﻿using Api.Common.Infrastructure;
+﻿using System;
+using Api.Common.Infrastructure;
+using Api.Common.Messaging.Abstractions;
+using Api.Common.Messaging.RabbitMQ;
+using Api.Statistics.EventHandlers;
+using Api.Statistics.Events;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 
 namespace Api.Statistics
 {
@@ -18,7 +27,7 @@ namespace Api.Statistics
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddDefaultCorsPolicy();
 
@@ -31,6 +40,35 @@ namespace Api.Statistics
 
             services.AddJwthAuthentication(Configuration);
             services.AddAuthorization();
+
+            services.AddTransient<UpdateKillsEventHandler>();
+            services.AddTransient<UpdateUserDeadthsEventHandler>();
+            services.AddTransient<PlayerStartedNewGameEventHandler>();
+
+            services.AddSingleton<IRabbitMQConnection>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<RabbitMQConnection>>();
+                var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "admin", Password = "admin", VirtualHost = "/" };
+
+                return new RabbitMQConnection(factory, logger);
+            });
+
+            services.AddSingleton<IEventBus, RabbitMqEventBus>(provider =>
+            {
+                var conn = provider.GetRequiredService<IRabbitMQConnection>();
+                var logger = provider.GetRequiredService<ILogger<RabbitMqEventBus>>();
+                var scope = provider.GetRequiredService<ILifetimeScope>();
+                var subsManager = provider.GetRequiredService<IEventBusSubscriptionManager>();
+
+                return new RabbitMqEventBus(conn, logger, scope, subsManager, "Statistics");
+            });
+
+            services.AddSingleton<IEventBusSubscriptionManager, EventBusSubscriptionManager>();
+
+            var autofacContainer = new ContainerBuilder();
+            autofacContainer.Populate(services);
+
+            return new AutofacServiceProvider(autofacContainer.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +89,17 @@ namespace Api.Statistics
             });
 
             app.UseAuthentication();
+
+            ConfigureEventBus(app);
+        }
+
+        private static void ConfigureEventBus(IApplicationBuilder app)
+        {
+            var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+
+            eventBus.Subscribe<UpdateUserDeathsEvent, UpdateUserDeadthsEventHandler>();
+            eventBus.Subscribe<UpdateUserKillsEvent, UpdateKillsEventHandler>();
+            eventBus.Subscribe<PlayerStartedNewGameEvent, PlayerStartedNewGameEventHandler>();
         }
     }
 }

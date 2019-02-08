@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 using System;
+using RabbitMQ.Client;
 
 namespace Api.Hub
 {
@@ -46,15 +47,24 @@ namespace Api.Hub
             services.AddTransient<INpcService, NpcService>();
             services.AddSingleton<IGameplay, Gameplay>();
 
-            services.AddSingleton<IEventBus, RabbitMQEventBus>(provider =>
+            services.AddSingleton<IRabbitMQConnection>(sp =>
+            {
+
+                var logger = sp.GetRequiredService<ILogger<RabbitMQConnection>>();
+                var factory = new ConnectionFactory() { HostName = "localhost", Port = 5672, UserName = "admin", Password = "admin", VirtualHost = "/"};
+
+                return new RabbitMQConnection(factory, logger);
+            });
+
+            services.AddSingleton<IEventBus, RabbitMqEventBus>(provider =>
             {
                 var conn = provider.GetRequiredService<IRabbitMQConnection>();
-                var logger = provider.GetRequiredService<ILogger<RabbitMQEventBus>>();
+                var logger = provider.GetRequiredService<ILogger<RabbitMqEventBus>>();
                 var scope = provider.GetRequiredService<ILifetimeScope>();
                 var subsManager = provider.GetRequiredService<IEventBusSubscriptionManager>();
 
-                return new RabbitMQEventBus(conn, logger, scope, subsManager);
-            });
+                return new RabbitMqEventBus(conn, logger, scope, subsManager, "Hub");
+             });
 
             services.AddSingleton<IEventBusSubscriptionManager, EventBusSubscriptionManager>();
 
