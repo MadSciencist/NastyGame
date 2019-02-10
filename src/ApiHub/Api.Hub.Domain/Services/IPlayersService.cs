@@ -1,6 +1,7 @@
-﻿using System;
-using Api.Hub.Domain.DTOs;
+﻿using Api.Hub.Domain.DTOs;
+using Api.Hub.Domain.EventArguments;
 using Api.Hub.Domain.GameDomain;
+using System;
 using System.Collections.Generic;
 
 namespace Api.Hub.Domain.Services
@@ -17,6 +18,6 @@ namespace Api.Hub.Domain.Services
         void UpdateStats(PlayerBase killer, PlayerBase victim);
         event EventHandler<Player> PlayerJoined;
         event EventHandler<Player> PlayerRemoved;
-        event EventHandler<Player> PlayerScored;
+        event EventHandler<PlayerScoredEventArgs> PlayerScored;
     }
 }

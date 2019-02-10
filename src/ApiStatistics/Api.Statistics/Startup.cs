@@ -4,6 +4,7 @@ using Api.Common.Messaging.Abstractions;
 using Api.Common.Messaging.RabbitMQ;
 using Api.Statistics.EventHandlers;
 using Api.Statistics.Events;
+using Api.Statistics.Infrastructure.Repository;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -41,6 +42,7 @@ namespace Api.Statistics
             services.AddJwthAuthentication(Configuration);
             services.AddAuthorization();
 
+            services.AddTransient<IStatisticsRepository, StatisticsRepository>();
             services.AddTransient<UpdateKillsEventHandler>();
             services.AddTransient<UpdateUserDeadthsEventHandler>();
             services.AddTransient<PlayerStartedNewGameEventHandler>();

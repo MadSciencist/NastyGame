@@ -6,15 +6,16 @@ namespace Api.Statistics.Events
     public class UpdateUserDeathsEvent : IntegrationEvent
     {
         public int UserId { get; set; }
+        public int KilledById { get; set; }
         public string KilledBy { get; set; }
-        public TimeSpan GameTime { get; set; }
+        public DateTime EndTime { get; set; }
 
-
-        public UpdateUserDeathsEvent(string killedBy, int userId, TimeSpan gameTime)
+        public UpdateUserDeathsEvent(int userId, int killedById, string killedBy,  DateTime gameTime)
         {
-            KilledBy = killedBy;
             UserId = userId;
-            GameTime = gameTime;
+            KilledById = killedById;
+            KilledBy = killedBy;
+            EndTime = gameTime;
         }
     }
 }

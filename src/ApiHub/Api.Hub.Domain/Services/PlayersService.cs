@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Api.Hub.Domain.EventArguments;
 
 namespace Api.Hub.Domain.Services
 {
@@ -12,7 +13,7 @@ namespace Api.Hub.Domain.Services
     {
         public event EventHandler<Player> PlayerJoined;
         public event EventHandler<Player> PlayerRemoved;
-        public event EventHandler<Player> PlayerScored;
+        public event EventHandler<PlayerScoredEventArgs> PlayerScored;
         private readonly INpcService _npcService;
         private readonly ILogger<PlayersService> _logger;
         private readonly List<PlayerBase> _players;
@@ -65,14 +66,26 @@ namespace Api.Hub.Domain.Services
         {
             if (killer is Player murderer)
             {
+                var victimId = -1;
+
                 murderer.Score++;
                 if (victim is Player vict)
                 {
                     murderer.Victims.Add(vict.Name);
                     vict.KilledBy = murderer.Name;
+                    vict.KilledById = murderer.GlobalId;
+                    victimId = vict.GlobalId;
+                }
+                else
+                {
+                    murderer.Victims.Add("NPC");
                 }
 
-                PlayerScored?.Invoke(this, murderer);
+                PlayerScored?.Invoke(this, new PlayerScoredEventArgs
+                {
+                    Murderer = murderer,
+                    VictimId = victimId
+                });
             }
         }
 

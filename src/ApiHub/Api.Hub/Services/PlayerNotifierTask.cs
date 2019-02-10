@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading;
+using Api.Hub.Domain.EventArguments;
 
 namespace Api.Hub.Services
 {
@@ -32,35 +33,37 @@ namespace Api.Hub.Services
             _playersService.PlayerScored += PlayersServiceOnPlayerScored;
         }
 
-        private void PlayersServiceOnPlayerJoined(object sender, Player e)
+        private void PlayersServiceOnPlayerJoined(object sender, Player ev)
         {
-            var @event = new PlayerStartedNewGameEvent(e.GlobalId, e.JoinedTime);
-            _eventBus.Publish(@event);
+            if (ev.IsAuthenticated)
+            {
+                var @event = new PlayerStartedNewGameEvent(ev.GlobalId, ev.JoinedTime);
+                _eventBus.Publish(@event);
+            }
         }
 
-        private async void PlayersServiceOnPlayerScored(object sender, Player player)
+        private async void PlayersServiceOnPlayerScored(object sender, PlayerScoredEventArgs ev)
         {
             // publish message to RabbitMQ
-            if (player.IsAuthenticated)
+            if (ev.Murderer.IsAuthenticated)
             {
-                var @event = new UpdateUserKillsEvent(player.GlobalId, player.Victims.LastOrDefault() ?? "NPC");
+                var @event = new UpdateUserKillsEvent(ev.Murderer.GlobalId, ev.VictimId, ev.Murderer.Victims.LastOrDefault());
                 _eventBus.Publish(@event);
             }
 
             // publish message to SignalR client
-            await _gameHub.Clients.Client(player.ConnectionId).SendAsync("Scored", new PlayerDto(player));
+            await _gameHub.Clients.Client(ev.Murderer.ConnectionId).SendAsync("Scored", new PlayerDto(ev.Murderer));
         }
 
-        private async void PlayersServiceOnPlayerRemoved(object sender, Player player)
+        private async void PlayersServiceOnPlayerRemoved(object sender, Player ev)
         {
-            if (player.IsAuthenticated)
+            if (ev.IsAuthenticated)
             {
-                var @event =
-                    new UpdateUserDeathsEvent(player.GlobalId, player.KilledBy, DateTime.Now - player.JoinedTime);
+                var @event = new UpdateUserDeathsEvent(ev.GlobalId, ev.KilledById, ev.KilledBy, DateTime.Now);
                 _eventBus.Publish(@event);
             }
 
-            await _gameHub.Clients.Client(player.ConnectionId).SendAsync("Lost", new PlayerDto(player));
+            await _gameHub.Clients.Client(ev.ConnectionId).SendAsync("Lost", new PlayerDto(ev));
         }
 
         protected override async void Execute()

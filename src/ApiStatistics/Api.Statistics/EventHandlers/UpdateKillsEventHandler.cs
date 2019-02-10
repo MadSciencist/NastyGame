@@ -1,17 +1,22 @@
 ﻿using Api.Common.Messaging.Abstractions;
 using Api.Statistics.Events;
-using System;
+using Api.Statistics.Infrastructure.Repository;
 using System.Threading.Tasks;
 
 namespace Api.Statistics.EventHandlers
 {
     public class UpdateKillsEventHandler : IIntegrationEventHandler<UpdateUserKillsEvent>
     {
-        public Task Handle(UpdateUserKillsEvent @event)
-        {
-            Console.WriteLine($"Update Kills: {@event.UserId} {@event.Victim}");
+        private readonly IStatisticsRepository _statisticsRepository;
 
-            return Task.CompletedTask;
+        public UpdateKillsEventHandler(IStatisticsRepository statisticsRepository)
+        {
+            _statisticsRepository = statisticsRepository;
+        }
+
+        public async Task Handle(UpdateUserKillsEvent @event)
+        {
+            await _statisticsRepository.AddUserVictim(@event.UserId, @event.VictimId, @event.Victim);
         }
     }
 }

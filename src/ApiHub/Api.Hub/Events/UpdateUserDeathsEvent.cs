@@ -6,15 +6,17 @@ namespace Api.Hub.Events
     public class UpdateUserDeathsEvent : IntegrationEvent
     {
         public int UserId { get; set; }
+        public int KilledById { get; set; }
         public string KilledBy { get; set; }
-        public TimeSpan GameTime { get; set; }
+        public DateTime EndTime { get; set; }
 
 
-        public UpdateUserDeathsEvent(int userId, string killedBy, TimeSpan gameTime)
+        public UpdateUserDeathsEvent(int userId, int killedById, string killedBy, DateTime gameTime)
         {
             UserId = userId;
+            KilledById = killedById;
             KilledBy = killedBy;
-            GameTime = gameTime;
+            EndTime = gameTime;
         }
     }
 }

@@ -2,16 +2,22 @@
 using Api.Statistics.Events;
 using System;
 using System.Threading.Tasks;
+using Api.Statistics.Infrastructure.Repository;
 
 namespace Api.Statistics.EventHandlers
 {
     public class PlayerStartedNewGameEventHandler : IIntegrationEventHandler<PlayerStartedNewGameEvent>
     {
-        public Task Handle(PlayerStartedNewGameEvent @event)
-        {
-            Console.WriteLine($"new game: {@event.UserId} {@event.JoineDate}");
+        private readonly IStatisticsRepository _statisticsRepository;
 
-            return Task.CompletedTask;
+        public PlayerStartedNewGameEventHandler(IStatisticsRepository statisticsRepository)
+        {
+            _statisticsRepository = statisticsRepository;
+        }
+
+        public async Task Handle(PlayerStartedNewGameEvent @event)
+        {
+            await _statisticsRepository.SaveNewGameAsync(@event.UserId, @event.JoineDate);
         }
     }
 }
