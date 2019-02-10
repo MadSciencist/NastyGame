@@ -6,16 +6,19 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Statistics.Infrastructure.Repository
 {
     public class StatisticsRepository : IStatisticsRepository
     {
         private readonly IOptions<ApiStatisticsConfiguration> _config;
+        private readonly ILogger<StatisticsRepository> _logger;
 
-        public StatisticsRepository(IOptions<ApiStatisticsConfiguration> config)
+        public StatisticsRepository(IOptions<ApiStatisticsConfiguration> config, ILogger<StatisticsRepository> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         public async Task SaveNewGameAsync(int playerId, DateTime startTime)
@@ -25,13 +28,13 @@ namespace Api.Statistics.Infrastructure.Repository
                 using (var connection = new SqlConnection(_config.Value.ConnectionString))
                 {
                     await connection.QueryAsync<UserGamesEntity>("InsertGame",
-                        new {PlayerId = playerId, StartTime = startTime},
+                        new { PlayerId = playerId, StartTime = startTime },
                         commandType: CommandType.StoredProcedure);
                 }
             }
             catch (SqlException e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError(e, "");
             }
         }
 
@@ -42,16 +45,16 @@ namespace Api.Statistics.Infrastructure.Repository
                 using (var connection = new SqlConnection(_config.Value.ConnectionString))
                 {
                     await connection.QueryAsync<UserGamesEntity>("EndGameSession",
-                        new {UserId = playerId, KilledById = killedById, KilledBy = killedBy, EndTime = endTime},
+                        new { UserId = playerId, KilledById = killedById, KilledBy = killedBy, EndTime = endTime },
                         commandType: CommandType.StoredProcedure);
                 }
             }
             catch (SqlException e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError(e, "");
             }
         }
-        
+
         public async Task AddUserVictim(int playerId, int victimId, string victimName)
         {
             try
@@ -65,7 +68,7 @@ namespace Api.Statistics.Infrastructure.Repository
             }
             catch (SqlException e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError(e, "");
             }
         }
     }

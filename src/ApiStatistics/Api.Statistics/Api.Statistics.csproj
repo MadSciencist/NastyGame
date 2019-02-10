@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ApiCommon\Api.Common.csproj" />
     <ProjectReference Include="..\Api.Statistics.Domain\Api.Statistics.Domain.csproj" />
+    <ProjectReference Include="..\Api.Statistics.Infrastructure\Api.Statistics.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
