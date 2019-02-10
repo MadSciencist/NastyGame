@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Api.Statistics.Domain.Entity;
 
 namespace Api.Statistics.Infrastructure.Repository
 {
@@ -8,5 +10,7 @@ namespace Api.Statistics.Infrastructure.Repository
         Task SaveNewGameAsync(int playerId, DateTime startTime);
         Task EndGameSession(int playerId, int killedById, string killedBy, DateTime endTime);
         Task AddUserVictim(int playerId, int victimId, string victimName);
+
+        Task<IEnumerable<UserGamesEntity>> GetUserGames(string userId);
     }
 }

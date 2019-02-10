@@ -3,6 +3,7 @@ using Api.Statistics.Domain.Entity;
 using Dapper;
 using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -70,6 +71,27 @@ namespace Api.Statistics.Infrastructure.Repository
             {
                 _logger.LogError(e, "");
             }
+        }
+
+        public async Task<IEnumerable<UserGamesEntity>> GetUserGames(string userId)
+        {
+            const string query = @"SELECT * FROM UserGames WHERE PlayerId = @PlayerId";
+
+            try
+            {
+                using (var connection = new SqlConnection(_config.Value.ConnectionString))
+                {
+                    var games = await connection.QueryAsync<UserGamesEntity>(query, new { PlayerId = userId });
+
+                    return games;
+                }
+            }
+            catch (SqlException e)
+            {
+                _logger.LogError(e, "");
+            }
+
+            return null;
         }
     }
 }

@@ -118,6 +118,12 @@ namespace Api.Hub.Domain.Services
         {
             var player = _players.ToList().FirstOrDefault(p => p.ConnectionId == connectionId);
 
+            // Fire even
+            if (player is Player playerToRemove)
+            {
+                PlayerRemoved?.Invoke(this, playerToRemove);
+            }
+
             if (player == null)
             {
                 _logger.LogInformation($"Player: {connectionId} doesnt exist.");
