@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Statistics", "src\ApiSt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api.Statistics.Domain", "src\ApiStatistics\Api.Statistics.Domain\Api.Statistics.Domain.csproj", "{F3D22A44-5C7C-4408-A24E-8D2D0BAD57F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Statistics.Infrastructure", "Api.Statistics.Infrastructure\Api.Statistics.Infrastructure.csproj", "{08C53EFE-BEFE-439F-B305-A76597CE0653}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Statistics.Infrastructure", "src\ApiStatistics\Api.Statistics.Infrastructure\Api.Statistics.Infrastructure.csproj", "{08C53EFE-BEFE-439F-B305-A76597CE0653}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

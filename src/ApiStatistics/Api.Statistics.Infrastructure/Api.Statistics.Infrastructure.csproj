@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\src\ApiCommon\Api.Common.csproj" />
     <ProjectReference Include="..\src\ApiStatistics\Api.Statistics.Domain\Api.Statistics.Domain.csproj" />
   </ItemGroup>
 

@@ -2,6 +2,7 @@
 using Api.Common.Infrastructure;
 using Api.Common.Messaging.Abstractions;
 using Api.Common.Messaging.RabbitMQ;
+using Api.Statistics.Domain;
 using Api.Statistics.EventHandlers;
 using Api.Statistics.Events;
 using Api.Statistics.Infrastructure.Repository;
@@ -30,6 +31,8 @@ namespace Api.Statistics
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ApiStatisticsConfiguration>(Configuration);
+
             services.AddDefaultCorsPolicy();
 
             services.AddHealthChecks().AddCheck<HealthCheck>("default");

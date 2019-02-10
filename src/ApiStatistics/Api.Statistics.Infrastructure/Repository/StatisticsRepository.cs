@@ -1,22 +1,28 @@
-﻿using System;
+﻿using Api.Statistics.Domain;
+using Api.Statistics.Domain.Entity;
+using Dapper;
+using Microsoft.Extensions.Options;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Api.Statistics.Domain.Entity;
-using Dapper;
-using System.Linq;
 
 namespace Api.Statistics.Infrastructure.Repository
 {
     public class StatisticsRepository : IStatisticsRepository
     {
-        private readonly string _connectionString = @"Server=(LocalDb)\MSSQLLocalDB;Database=StatisticsServiceDb;";
+        private readonly IOptions<ApiStatisticsConfiguration> _config;
+
+        public StatisticsRepository(IOptions<ApiStatisticsConfiguration> config)
+        {
+            _config = config;
+        }
 
         public async Task SaveNewGameAsync(int playerId, DateTime startTime)
         {
             try
             {
-                using (var connection = new SqlConnection(_connectionString))
+                using (var connection = new SqlConnection(_config.Value.ConnectionString))
                 {
                     await connection.QueryAsync<UserGamesEntity>("InsertGame",
                         new {PlayerId = playerId, StartTime = startTime},
@@ -33,7 +39,7 @@ namespace Api.Statistics.Infrastructure.Repository
         {
             try
             {
-                using (var connection = new SqlConnection(_connectionString))
+                using (var connection = new SqlConnection(_config.Value.ConnectionString))
                 {
                     await connection.QueryAsync<UserGamesEntity>("EndGameSession",
                         new {UserId = playerId, KilledById = killedById, KilledBy = killedBy, EndTime = endTime},
@@ -50,7 +56,7 @@ namespace Api.Statistics.Infrastructure.Repository
         {
             try
             {
-                using (var connection = new SqlConnection(_connectionString))
+                using (var connection = new SqlConnection(_config.Value.ConnectionString))
                 {
                     await connection.QueryAsync<GameVictimsEntity>("InsertVictim",
                         new { UserId = playerId, VictimId = victimId, VictimName = victimName },
