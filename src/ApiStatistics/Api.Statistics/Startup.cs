@@ -3,11 +3,15 @@ using Api.Common.Infrastructure;
 using Api.Common.Messaging.Abstractions;
 using Api.Common.Messaging.RabbitMQ;
 using Api.Statistics.Domain;
+using Api.Statistics.Domain.DTOs;
+using Api.Statistics.Domain.Entity;
 using Api.Statistics.EventHandlers;
 using Api.Statistics.Events;
+using Api.Statistics.Infrastructure.Mappings;
 using Api.Statistics.Infrastructure.Repository;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +49,8 @@ namespace Api.Statistics
             services.AddJwthAuthentication(Configuration);
             services.AddAuthorization();
 
+            services.AddAutoMapper(typeof(MappingConfiguration).Assembly); 
+
             services.AddTransient<IStatisticsRepository, StatisticsRepository>();
             services.AddTransient<UpdateKillsEventHandler>();
             services.AddTransient<UpdateUserDeadthsEventHandler>();
@@ -79,6 +85,8 @@ namespace Api.Statistics
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            //mapper.ConfigurationProvider.AssertConfigurationIsValid();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -95,10 +103,10 @@ namespace Api.Statistics
 
             app.UseAuthentication();
 
-            ConfigureEventBus(app);
+            UseEventBus(app);
         }
 
-        private static void ConfigureEventBus(IApplicationBuilder app)
+        private static void UseEventBus(IApplicationBuilder app)
         {
             var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
 
